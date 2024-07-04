@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Flashcard & Quiz for new tab Extension",
+  "version": "1.1.2.2",
+  "description": "Displays a flashcard with a random word-definition every time a new page is opened.",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "128": "icon128.png"
+    }
+  },
+  "content_security_policy": {
+    "script-src": "'self'",
+    "object-src": "'self'"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab/newtab.html"
+  }
+}

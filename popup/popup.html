@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Flashcards</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .flashcard { margin: 10px 0; }
+    #message { margin-top: 10px; color: green; }
+ 
+  </style>
+  <link rel="stylesheet" href="../libs/semantic.css">
+</head>
+<body>
+  <div class = "ui center aligned basic segment">
+    <div class="ui message">
+      <h1 class = "ui header">Manage Flashcards</h1>
+    </div>
+  </div>
+  <form class = "ui center aligned basic segment" id="addVocabForm">
+    <div class="ui input"> 
+      <input type="text" id="word" placeholder="Word" required />
+    </div>
+    <div class="ui input"> 
+      <input type="text" id="definition" placeholder="Definition" required />
+    </div>
+    <select class = "ui search dropdown" id="bookSelector" style="margin:auto; margin-top: 5px;margin-bottom: 5px;display: block;">
+    </select>
+
+    <div class="ui field" id="newBookField" style="display:none;margin-top:5px; margin-bottom: 5px;background-color:#c5d5c7 ; border-radius: 8px;">
+      <input type="text" style = "margin-top:5px;margin-bottom: 5px ;"id="newBook" placeholder="Enter new collection name">
+      <button class="ui teal basic button"style = "margin-top:5px;margin-bottom: 5px ;" id="addBookButton">Add collection</button>
+    </div>
+    <button style = "display: Block;margin-left: auto;margin-right: auto;" class = "ui button" type="submit">Add</button>
+  </form>
+  <div class = "ui container" id="message"></div>
+  <button style = "display: Block;margin-left: auto;margin-right: auto;"class="ui button" id="manageButton">Manage Vocabulary List</button>
+  <script src="../libs/semantic.css"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

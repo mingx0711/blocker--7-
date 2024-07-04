@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vocabulary of the Day</title>
+  <style>
+    body { font-family: Arial, sans-serif;background-color: #94a675;}
+    .flashcard {  position: relative;
+            transform: translateY(20%);
+            text-align: center;
+            height: 350px;
+            width: 800px;
+            margin: auto; padding: 20px; border: 10px solid; border-radius: 25px; display: inline-block; }
+    #snoozeButton, #nextButton {  position: relative; left: 40%;text-align: center; margin-top: 100px; margin-left: 25px; }
+    .quiz-container, .true-false-container {top: 40%; transform: translateY(20%); text-align: center; margin: 10px 0; padding: 20px; border: 1px solid #ccc; border-radius: 4px;display: none; }
+    .quiz-option { margin-top: 20px; display: block; width: 800px; border: 30px;border-color: #272623;}
+    #correctMessage, #incorrectMessage { display: none; font-weight: bold; }
+    #correctMessage { color: green; }
+    #incorrectMessage { color: red; }
+    #nextAfterIncorrectButton { display: none; margin-top: 10px; }
+  </style>
+    <link rel="stylesheet" href="../libs/semantic.css">
+</head>
+<body>
+  <div id="vocabFlashcard" class="flashcard" style = "background-color:#ffffff;margin: auto ;">
+    
+    <div style = "font-size: 15px; color:#4b5437;" id="bookDiv"></div>
+    <div style = "font-size: 60px;color:#272623;" id="wordDiv"></div>
+    <div class="ui horizontal divider" id = "divider" style = "color:#545150; height: 5px" ></div>
+    <div style = "font-size: 60px; color:#4b5437;" id="defDiv"></div>
+  </div>
+  <div class="quiz-container" style="top: 2%;margin: auto ;border: 10px solid;" id="quizContainer">
+    <p style="font-size: 350%;" id="quizQuestion"></p>
+    <button style="font-size: 270%;margin: auto ;margin-top: 10px; border: 10px; border-radius: 5px; border-color: #607059;" class="ui quiz-option" id="option1"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 10px;border: 10px;  border-radius: 5px;border-color: #607059;" class="ui quiz-option" id="option2"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 10px;border: 10px;  border-radius: 5px;border-color: #607059;" class="ui quiz-option" id="option3"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 10px;border: 10px;  border-radius: 5px;border-color: #607059;" class="ui quiz-option" id="option4"></button>
+  </div>
+  <div class="true-false-container"  style="top: 2%;margin: auto ;border: 10px solid;" id="trueFalseContainer">
+    <p style="font-size: 350%;"id="trueFalseQuestion"></p>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 4px;  border-radius: 5px;border-color: #607059;" class="ui button" id="trueButton">True</button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 4px;  border-radius: 5px;border-color: #607059;" class="ui button" id="falseButton">False</button>
+  </div>
+  <div class="match-container" style="top: 2%;margin: auto ;" id="matchContainer">
+    <p style="font-size: 350%;"id="matchQuestion"></p>
+    <div id="words" class="list"></div>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui match-option" id="word1"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui match-option" id="word2"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui match-option" id="word3"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui match-option" id="word4"></button>
+
+    <div id="definitions" class="list"></div>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui match-" id="def1"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui button" id="def2"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui button" id="def3"></button>
+    <button style="font-size: 270%;margin: auto ;margin-top: 30px;border: 10px; border-color: #607059;" class="ui button" id="def4"></button>
+
+  </div>
+  <p class = "ui message" id="correctMessage" style="margin: auto ;width: 300px; margin-top: 10px ; font-size:50px; text-align: center;">Correct!</p>
+  <p class = "ui message" id="incorrectMessage" style=" text-align: center;">Incorrect! The correct definition is:</p>
+  <div id="correctDefinition" class="ui flashcard" style = "background-color:#ebebe9;height:200px; font-size: 200% ;margin: auto ;"></div>
+  <div style = "display: block;justify-content: center;
+            align-items: center;flex-wrap: wrap; padding-top:20px;">
+  <button class = "ui button"id="snoozeButton" style = "border: 3px solid;font-weight: bold;">Snooze</button>
+  <button class = "ui button"id="nextButton"style = "border: 3px solid;font-weight: bold;">Next</button>
+  <button class = "ui button" id="nextAfterIncorrectButton" style="border: 3px solid;position: relative ; left:50% ; margin-top: 50px">Next</button>
+  </div>
+  <div class="ui form" style = "display: flex;justify-content: center;
+            align-items: center;flex-wrap: wrap; padding-top:20px;"id="displayBooksContainer"> 
+    <div style = "display: flex;justify-content: center;
+            align-items: center; margin-right: 10px;"> Show vocabs from collections(if you untick all it will show all vocabs):     </div>
+    <div style = "display: flex;justify-content: center;
+            align-items: center;flex-wrap: wrap;"id="displayBookList"></div>
+  </div>
+  <div class="ui"  style = "display: flex;justify-content: center;
+            align-items: center;flex-wrap: wrap; padding-top:20px;"> 
+    <button class="ui color-option button" style = "background-color:#f4d6b4" data-palette="Orange">Orange</button>
+    <button class="ui color-option button" data-palette="Yellow" style ="background-color:#fff985">Yellow</button>
+    <button class="ui color-option button" style = "background-color:#c0e175" data-palette="Green">Olive</button>
+    <button class="ui color-option button" style = "background-color:#b8d7ce"data-palette="Teal">Teal</button>
+    <button class="ui color-option button" style = "background-color:#9aacd0"data-palette="Violet">Violet</button>
+    <button class="ui color-option button" style = "background-color:#c1b3df"data-palette="Purple">Purple</button>
+    <button class="ui color-option button" style = "background-color:#f2d9e0"data-palette="Pink">Pink</button>
+    <button class="ui color-option button" style = "background-color:#dcdcdc"data-palette="Basic">Basic</button>
+    <button class="ui color-option button" style = "background-color:#edbaea"data-palette="y2k">y2k</button>
+    <button class="ui color-option button" style = "background-color:#cdc1a4"data-palette="bear">Bear</button>
+    <button class="ui color-option button" style = "background-color:#f5d492"data-palette="calico">Calico</button>
+  </div>
+  <script src="../libs/semantic.css"></script>
+  <script src="newtab.js"></script>
+</body>
+</html>
