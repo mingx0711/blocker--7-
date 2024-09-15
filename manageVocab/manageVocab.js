@@ -5,7 +5,8 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
   const word = document.getElementById('word').value;
   const definition = document.getElementById('definition').value;
   const book = document.getElementById('bookSelector').value;
-  
+  const pronounciation = document.getElementById('pronounciation').value;
+  const gender = document.getElementById('gender').value;
   lastBook = book;
   // Get existing vocab data from Chrome storage
   chrome.storage.local.get('vocabList', function(data) {
@@ -20,8 +21,11 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
     
     populateBookSelector()
     // Append the new word, definition, snoozed field, and seen field
-    vocabList.push({ word, definition,book, snoozed: false, seen: 0, quizResults:['n','n','n','n'] });
+    vocabList.push({ word, definition, snoozed: false , book, gender,pronounciation,seen: 0, quizResults: ['n','n','n','n']});
     // Save updated vocab list to Chrome storage
+    vocabList.map(item => {
+      return { ...item, book: item.gender.toLowerCase() };
+    });
     chrome.storage.local.set({ vocabList: vocabList }, function() {
       updateVocabList(vocabList);
 
@@ -283,11 +287,12 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get('vocabList', function(data) {
       let vocabList = data.vocabList || [];
       vocabPairs.forEach(pair => {
-        const [word, definition] = pair.split(':');
+        const [word, definition, gender,pronounciation] = pair.split(':');
         if (word && definition) {
           console.log(`Word: ${word.trim()}, Definition: ${definition.trim()}, book: ${book.trim()}`);
           chrome.storage.local.set({ lastBook: book.trim() });
-          vocabList.push({ word, definition,book, snoozed: false, seen: 0, quizResults:['n','n','n','n'] });
+
+          vocabList.push({ word, definition,book, snoozed: false, gender, pronounciation,seen: 0, quizResults:['n','n','n','n'] });
           chrome.storage.sync.get({ bookList: [] }, (result) => {
             const bookList = result.bookList;
             if (!bookList.includes(book)) {

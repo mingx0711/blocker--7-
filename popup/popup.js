@@ -4,11 +4,13 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
   const word = document.getElementById('word').value;
   const definition = document.getElementById('definition').value;
   const book = document.getElementById('bookSelector').value;
+  const pronounciation = document.getElementById('pronounciation').value;
+  const gender = document.getElementById('gender').value;
   // Get existing vocab data from Chrome storage
   chrome.storage.local.get('vocabList', function(data) {
     let vocabList = data.vocabList || [];
     // Append the new word, definition, and snoozed field
-    vocabList.push({ word, definition, snoozed: false , book, seen: 0, quizResults: ['n','n','n','n']});
+    vocabList.push({ word, definition, snoozed: false , book, gender,pronounciation,seen: 0, quizResults: ['n','n','n','n']});
     chrome.storage.local.set({ lastBook: book }, function() {});
     // Save updated vocab list to Chrome storage
     chrome.storage.local.set({ vocabList: vocabList }, function() {

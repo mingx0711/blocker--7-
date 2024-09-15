@@ -69,7 +69,14 @@
   <button class="ui button basic" id="exportTotxt"> Export vocabs to text(formatted for bulk import)</button>
   <div id="popup-overlay"></div>
   <div id="popup">
-    <textarea id="vocabInput" style="width: 350px;height: 300px;"placeholder="Enter your word and definition pair seperate word and definition with ':' and each pair with '|'. for example, kartoffel:potato | morgen:morning"></textarea>
+    <textarea id="vocabInput" style="width: 350px;height: 300px;"placeholder="Enter your word and definition pair seperate word,definition,(optional)gender.(Please make sure your spelling is correct),(optional) pronounciation with ':' and each word with '|'. Its quite easy to ask chatGPT for formatting so you dont have to do it yourself when you copy off a list of vocabs from an external source.for example,
+      Kartoffel:potato:feminine:/kaʁˈtɔfəl/| Morgen :morning:masculine:/ˈmɔrɡən/
+      This will get you two words with gender and pronounciation.If you want to leave out gender, then you can put
+      Kartoffel:potato::/kaʁˈtɔfəl/| Morgen:morning::/ˈmɔrɡən/
+      if you want to leave out pronounciation, you can put 
+      Kartoffel:potato:feminine:| Morgen:morning:maculine:
+      if you want to leave out both, you can put:
+      Kartoffel:potato::| Morgen:morning::" ></textarea>
     <button id="submitVocabButton">Submit</button>
     <select class = "ui search dropdown" id="bookSelector2" style="margin:auto; margin-top: 5px; width:100px ;margin-bottom: 5px;display: block;">
     </select>
@@ -81,6 +88,16 @@
     </div>
     <div class="ui input">
       <input class="ui input" type="text" id="definition" placeholder="Definition" required />
+    </div>
+    <div class="ui input"> 
+      <select type="text" id="gender">
+        <option value="neuter">neuter</option>
+        <option value="common">common</option>
+        <option value="feminine">feminine</option>
+        <option value="masculine">masculine</option>
+    </div>
+    <div class="ui input"> 
+      <input type="text" id="pronounciation" placeholder="pronounciation (optional)"/>
     </div>
     <select class = "ui search dropdown" id="bookSelector" style="margin:auto; margin-top: 5px;margin-bottom: 5px;display: block;">
       <option value="addNew" >Add new Vocab Collection</option>

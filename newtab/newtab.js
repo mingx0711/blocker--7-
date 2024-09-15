@@ -47,11 +47,16 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('trueButton').addEventListener('click', function() {
     checkTrueFalse(true);
   });
-
+  document.getElementById('testButton').addEventListener('click', function() {
+    chrome.tabs.create({ url: 'test1/test1.html' });
+  });
   document.getElementById('falseButton').addEventListener('click', function() {
     checkTrueFalse(false);
   });
   chrome.storage.sync.get({ bookList: [] }, (result) => {
+    chrome.storage.sync.get({ currentCollectionSelection}, (data)=> {
+    selectedbooks = data.currentCollectionSelection || ""
+    console.log(selectedbooks)
     const bookList = result.bookList;
     console.log(bookList)
     displayBookList.innerHTML = '';
@@ -61,7 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = book;
-        checkbox.checked = true; // All books are checked by default
+        if(selectedbooks.includes(book)){
+          checkbox.checked = true;
+        }else{
+          checkbox.checked = false;
+        }
+         // All books are checked by default
         checkbox.addEventListener('change', updateCheckedBooks);
         let label = document.createElement('label');
         label.htmlFor = book;
@@ -71,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkboxContainer.classList.add("ui","checkbox")
         displayBookList.appendChild(checkboxContainer);
     });
+  });
 });
 });
 
@@ -100,6 +111,7 @@ function showNextItem(checkBooks = ["all"]) {
     }
   }
 }
+
 function changeColor(palette){
   const colors = {
     Orange: {
@@ -207,9 +219,7 @@ function changeColor(palette){
       buttonShadow: '4px 4px 1px 0px #3d1c0d'
     }
   };
-
   const selectedPalette = colors[palette];
-  console.log( colors[palette]);
   document.querySelectorAll('.flashcard').forEach(element => {
     element.style.borderColor  = selectedPalette.borderColor;
     element.style.backgroundColor = selectedPalette.vocabFlashcardBg;
@@ -217,6 +227,8 @@ function changeColor(palette){
   });
   document.getElementById('wordDiv').style.color = selectedPalette.wordDivColor;
   document.getElementById('defDiv').style.color = selectedPalette.defDivColor;
+  document.getElementById('pronounDiv').style.color = selectedPalette.defDivColor;
+  document.getElementById('genderDiv').style.color = selectedPalette.defDivColor;
 
   document.getElementById('quizContainer').style.borderColor= selectedPalette.borderColor;
   document.getElementById('quizContainer').style.backgroundColor= selectedPalette.vocabFlashcardBg;
@@ -240,6 +252,9 @@ function changeColor(palette){
   
   document.getElementById('falseButton').style.color= selectedPalette.Snooze;
   document.getElementById('falseButton').style.boxShadow= selectedPalette.shadow;
+
+  document.getElementById('testButton').style.backgroundColor = selectedPalette.Snooze;
+  document.getElementById('testButton').style.boxShadow = selectedPalette.buttonShadow;
 
   document.getElementById('snoozeButton').style.backgroundColor = selectedPalette.Snooze;
   document.getElementById('snoozeButton').style.boxShadow = selectedPalette.buttonShadow;
@@ -318,10 +333,24 @@ function showNextVocab(collection = currentCollectionSelection) {
       let wordDiv = document.getElementById('wordDiv');
       let defDiv = document.getElementById('defDiv');
       let bookDiv = document.getElementById('bookDiv');
-  
+      let pronounDiv = document.getElementById('pronounDiv');
+      let genderDiv = document.getElementById('genderDiv');
+
       const word = currentCollection[currentVocabIndex].word;
       const definition = currentCollection[currentVocabIndex].definition;
       const book = currentCollection[currentVocabIndex].book || '';
+      if(currentCollection[currentVocabIndex].gender){
+        const gender = currentCollection[currentVocabIndex].gender;
+        genderDiv.textContent = gender
+      }else{
+        genderDiv.textContent = ""
+      }
+      if(currentCollection[currentVocabIndex].pronounciation){
+        const pronoun = currentCollection[currentVocabIndex].pronounciation;
+        pronounDiv.textContent = pronoun;
+      }else{
+        pronounDiv.textContent = ""
+      }
       wordDiv.innerHTML = word.bold();
       defDiv.textContent =definition;
       bookDiv.textContent = book;
@@ -352,7 +381,7 @@ function snoozeCurrentVocab() {
 }
 
 function showQuiz() {
-  const quizStyle = Math.floor(Math.random() * 3);
+  const quizStyle = Math.floor(Math.random() * 5);
   console.log(quizStyle);
   switch(quizStyle){
     case 0:
@@ -364,12 +393,18 @@ function showQuiz() {
     case 2:
       quizStyle3();
       break;
+    case 3:
+      quizStyle4();
+      break;
+    case 4:
+      quizStyle5();
+      break;
   }
-  //quizStyle4()
 }
 function updateQuizResults(result,word) {
+  console.log(result,word)
   for (const item of vocabList) {
-    if (item.word === word || item.definition === word) {
+    if (item.word === word) {
       console.log(item)
       let quizResults = item.quizResults;
       quizResults.unshift(result);
@@ -389,11 +424,9 @@ function quizStyle1(){
     showNextVocab();
     return;
   }
-
   const quizIndex = Math.floor(Math.random() * eligibleVocab.length);
   const correctVocab = eligibleVocab[quizIndex];
   currentQuizWord = correctVocab.word;
-  console.log(currentQuizWord);
   const options = [correctVocab.definition];
   for (let i = 0; i<3;i++) {    
     const randomIndex = Math.floor(Math.random() * vocabList.length);
@@ -414,6 +447,7 @@ function quizStyle1(){
   document.getElementById('option4').textContent = options[3];
 
   document.getElementById('quizContainer').dataset.correctAnswer = correctVocab.definition;
+  document.getElementById('quizContainer').dataset.correctWord = correctVocab.word;
 
   // Show quiz and hide vocab card
   document.getElementById('quizContainer').style.display = 'block';
@@ -458,6 +492,7 @@ function quizStyle2(){
  document.getElementById('option4').textContent = options[3];
 
  document.getElementById('quizContainer').dataset.correctAnswer = correctVocab.word;
+ document.getElementById('quizContainer').dataset.correctWord = correctVocab.word;
 
  // Show quiz and hide vocab card
  document.getElementById('quizContainer').style.display = 'block';
@@ -504,7 +539,108 @@ document.getElementById('correctMessage').style.display = 'none';
 document.getElementById('incorrectMessage').style.display = 'none';
 document.getElementById('correctDefinition').style.display = 'none';
 document.getElementById('nextAfterIncorrectButton').style.display = 'none';
- }
+}
+function quizStyle4(){
+  console.log("4, ask for pronounciation")
+  const eligibleVocab = vocabList.filter(entry => entry.seen > 3 && entry.pronounciation&& entry.pronounciation!="");
+  const eligibleOptions = vocabList.filter(entry => entry.pronounciation&& entry.pronounciation!="");
+  const numberOfDifferentTypes = new Set(eligibleOptions.map(item => item.pronounciation)).size;
+  console.log("numberOfDifferentTypesQuiz4",numberOfDifferentTypes)
+
+  console.log(eligibleOptions)
+  if (eligibleVocab.length < 1 || numberOfDifferentTypes <3 || eligibleOptions.length<3) {
+    showNextVocab();
+    return;
+  }
+
+  const quizIndex = Math.floor(Math.random() * eligibleVocab.length);
+  const correctVocab = eligibleVocab[quizIndex];
+  currentQuizWord = correctVocab.word;
+  console.log(currentQuizWord);
+  currentQuizDefinition = correctVocab.pronounciation;
+  if(currentQuizDefinition==""){
+    quizStyle1();
+  }else{
+    const options = [correctVocab.pronounciation];
+  for (let i = 0; i<3;i++) {    
+    const randomIndex = Math.floor(Math.random() * eligibleOptions.length);
+    const randomPronounciation = eligibleOptions[randomIndex].pronounciation;
+    console.log(randomPronounciation)
+    if (!options.includes(randomPronounciation)) {
+      options.push(randomPronounciation);
+    }else{
+      i--;
+    }
+  }
+
+  shuffleArray(options);
+
+  document.getElementById('quizQuestion').textContent = `What is the pronounciation of "${correctVocab.word}"?`;
+  document.getElementById('option1').textContent = options[0];
+  document.getElementById('option2').textContent = options[1];
+  document.getElementById('option3').textContent = options[2];
+  document.getElementById('option4').textContent = options[3];
+
+  document.getElementById('quizContainer').dataset.correctAnswer = correctVocab.pronounciation;
+  document.getElementById('quizContainer').dataset.correctWord = correctVocab.word;
+
+  // Show quiz and hide vocab card
+  document.getElementById('quizContainer').style.display = 'block';
+  document.getElementById('vocabFlashcard').style.display = 'none';
+  document.getElementById('correctMessage').style.display = 'none';
+  document.getElementById('incorrectMessage').style.display = 'none';
+  document.getElementById('correctDefinition').style.display = 'none';
+  document.getElementById('nextAfterIncorrectButton').style.display = 'none';
+  }
+  
+}
+function quizStyle5(){
+  console.log("5, ask for gender")
+  const eligibleVocab = vocabList.filter(entry => entry.seen > 3 && entry.gender&& entry.gender!=""&&entry.gender!="undefined");
+  const numberOfDifferentTypes = new Set(vocabList.map(item => item.gender)).size;
+  console.log("numberOfDifferentTypes",numberOfDifferentTypes)
+  console.log(eligibleVocab)
+  const eligibleOptions = vocabList.filter(entry => entry.gender&& entry.gender!=""&&entry.gender!="undefined");
+
+  if (eligibleVocab.length < 1 || numberOfDifferentTypes <2) {
+    showNextVocab();
+    return;
+  }
+  const quizIndex = Math.floor(Math.random() * eligibleVocab.length);
+  const correctVocab = eligibleVocab[quizIndex];
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = correctVocab.gender;
+  quizType = 'truefalse';
+  
+  isPairCorrect = Math.random() < 0.5;
+  
+  if (!isPairCorrect) {
+    let incorrectVocab;
+    do {
+      const randomIndex = Math.floor(Math.random() * eligibleOptions.length);
+      incorrectVocab = eligibleOptions[randomIndex];
+    } 
+    while (incorrectVocab.word === currentQuizWord);
+    do {
+      const randomIndex = Math.floor(Math.random() * eligibleOptions.length);
+      incorrectVocab = eligibleOptions[randomIndex];
+    } 
+    while (incorrectVocab.gender === currentQuizWord.gender);
+    
+  }
+    document.getElementById('quizQuestion').textContent = `What is the gender of "${correctVocab.word}"?`;
+  
+  document.getElementById('trueFalseQuestion').textContent = `Is the gender of "${currentQuizWord}" "${currentQuizDefinition}"?`;
+  
+  // Show true/false quiz and hide vocab card
+  document.getElementById('trueFalseContainer').style.display = 'block';
+  document.getElementById('quizContainer').style.display = 'none';
+  document.getElementById('vocabFlashcard').style.display = 'none';
+  document.getElementById('correctMessage').style.display = 'none';
+  document.getElementById('incorrectMessage').style.display = 'none';
+  document.getElementById('correctDefinition').style.display = 'none';
+  document.getElementById('nextAfterIncorrectButton').style.display = 'none';
+  }
 // const wordsList = document.getElementById('words');
 // const definitionsList = document.getElementById('definitions');
 
@@ -595,11 +731,12 @@ document.getElementById('nextAfterIncorrectButton').style.display = 'none';
 
 function checkAnswer(button) {
   const correctAnswer = document.getElementById('quizContainer').dataset.correctAnswer;
+  const correctWord = document.getElementById('quizContainer').dataset.correctWord;
   const correctMessage = document.getElementById('correctMessage');
   const incorrectMessage = document.getElementById('incorrectMessage');
   const correctDefinition = document.getElementById('correctDefinition');
   const result = button.textContent === correctAnswer ? 't' : 'f';
-  updateQuizResults(result,correctAnswer);
+  updateQuizResults(result,correctWord);
 
   if (button.textContent === correctAnswer) {
     button.classList.add('correct');
@@ -628,7 +765,16 @@ function showCorrectAnswer() {
   vocabFlashcard.style.display = 'block';
   const correctVocab = vocabList.find(entry => entry.word === currentQuizWord);
   if (correctVocab) {
+
     vocabFlashcard.textContent = `${correctVocab.word}: ${correctVocab.definition}`;
+    if(correctVocab.gender && correctVocab.gender!=""){
+      vocabFlashcard.textContent+= "gender:"
+      vocabFlashcard.textContent+= correctVocab.gender
+    }
+    if(correctVocab.pronounciation && correctVocab.pronounciation!=""){
+      vocabFlashcard.textContent+= "pronounciation:"
+      vocabFlashcard.textContent+= correctVocab.pronounciation
+    }
     document.getElementById('quizContainer').style.display = 'none';
     vocabFlashcard.style.display = 'block';
   }
@@ -675,7 +821,6 @@ function getCheckedBooks(){
           checkedBooks.push(checkbox.id);
       }
   });
-  console.log("checkedBOoks",checkedBooks )
   return checkedBooks;
 }
 function updateCheckedBooks() {

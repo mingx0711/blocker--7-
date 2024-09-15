@@ -7,8 +7,8 @@
     .flashcard {  position: relative;
             transform: translateY(20%);
             text-align: center;
-            height: 350px;
-            width: 800px;
+            height: 400px;
+            width: 80vw;
             margin: auto; padding: 20px; border: 10px solid; border-radius: 25px; display: inline-block; }
     #snoozeButton, #nextButton {  position: relative; left: 40%;text-align: center; margin-top: 100px; margin-left: 25px; }
     .quiz-container, .true-false-container {top: 40%; transform: translateY(20%); text-align: center; margin: 10px 0; padding: 20px; border: 1px solid #ccc; border-radius: 4px;display: none; }
@@ -23,8 +23,10 @@
 <body>
   <div id="vocabFlashcard" class="flashcard" style = "background-color:#ffffff;margin: auto ;">
     
-    <div style = "font-size: 15px; color:#4b5437;" id="bookDiv"></div>
+    <div style = "font-size: 15px; color:#4b5437;" id="bookDiv"></div>   
+    <div style = "font-size: 40px;color:#272623;" id="pronounDiv"></div>
     <div style = "font-size: 60px;color:#272623;" id="wordDiv"></div>
+    <div style = "font-size: 20px;color:#272623;" id="genderDiv"></div>
     <div class="ui horizontal divider" id = "divider" style = "color:#545150; height: 5px" ></div>
     <div style = "font-size: 60px; color:#4b5437;" id="defDiv"></div>
   </div>
@@ -56,23 +58,24 @@
 
   </div>
   <p class = "ui message" id="correctMessage" style="margin: auto ;width: 300px; margin-top: 10px ; font-size:50px; text-align: center;">Correct!</p>
-  <p class = "ui message" id="incorrectMessage" style=" text-align: center;">Incorrect! The correct definition is:</p>
+  <p class = "ui message" id="incorrectMessage" style=" text-align: center;">Incorrect! The correct answer is:</p>
   <div id="correctDefinition" class="ui flashcard" style = "background-color:#ebebe9;height:200px; font-size: 200% ;margin: auto ;"></div>
   <div style = "display: block;justify-content: center;
             align-items: center;flex-wrap: wrap; padding-top:20px;">
-  <button class = "ui button"id="snoozeButton" style = "border: 3px solid;font-weight: bold;">Snooze</button>
-  <button class = "ui button"id="nextButton"style = "border: 3px solid;font-weight: bold;">Next</button>
+  <button class = "ui button"id="snoozeButton" style = "border: 3px solid;position: fixed;bottom:19%;transform: translateX(-50%);left: 40%;font-weight: bold;">Snooze</button>
+  <button class = "ui button"id="nextButton"style = "border: 3px solid;position: fixed;bottom:19%;transform: translateX(-50%);left: 60%;font-weight: bold;">Next</button>
+  <button class = "ui button"id="testButton" style = "border: 3px solid;position: fixed;bottom:19%;transform: translateX(-50%);left: 52%;font-weight: bold;">Test your vocabs</button>
   <button class = "ui button" id="nextAfterIncorrectButton" style="border: 3px solid;position: relative ; left:50% ; margin-top: 50px">Next</button>
   </div>
-  <div class="ui form" style = "display: flex;justify-content: center;
+  <div class="ui form" style = "display: flex;position: fixed;bottom:13%;justify-content: center;transform: translateX(-50%);left: 50%;
             align-items: center;flex-wrap: wrap; padding-top:20px;"id="displayBooksContainer"> 
     <div style = "display: flex;justify-content: center;
             align-items: center; margin-right: 10px;"> Show vocabs from collections(if you untick all it will show all vocabs):     </div>
     <div style = "display: flex;justify-content: center;
             align-items: center;flex-wrap: wrap;"id="displayBookList"></div>
   </div>
-  <div class="ui"  style = "display: flex;justify-content: center;
-            align-items: center;flex-wrap: wrap; padding-top:20px;"> 
+  <div class="ui"  style = "display: flex;position: fixed;justify-content: center;bottom:0%;
+                transform: translateX(-50%);left: 50%;align-items: center;flex-wrap: wrap; padding-top:20px;"> 
     <button class="ui color-option button" style = "background-color:#f4d6b4" data-palette="Orange">Orange</button>
     <button class="ui color-option button" data-palette="Yellow" style ="background-color:#fff985">Yellow</button>
     <button class="ui color-option button" style = "background-color:#c0e175" data-palette="Green">Olive</button>
