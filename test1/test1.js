@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', function() {
 );
 
 function displayTests(bookSelected){
-  console.log(bookSelected)
   chrome.storage.local.get('vocabList', function(data) {
     if (data.vocabList) {
       vocabList = data.vocabList;
@@ -72,10 +71,10 @@ function displayTests(bookSelected){
         document.getElementById('vocabFlashcard').textContent = "Come back after theres more vocabs";
       }else{
         if(bookSelected === "All collections"){
-          console.log(bookSelected)
           filteredVocabList = vocabList;
         }else{
           filteredVocabList = vocabList.filter(vocab => vocab.book === bookSelected);
+          console
         }
         totalNoCount = filteredVocabList.length;
         document.getElementById('wrongCountDiv').textContent = `"${currentQuizNo}" / ${totalNoCount}"`;
@@ -139,24 +138,23 @@ function showNextItem() {
 
     const quizStyle = Math.floor(Math.random() * 5);
     console.log(quizStyle);
-    quizStyle5();
-    // switch(quizStyle){
-    //   case 0:
-    //     quizStyle1();
-    //     break;
-    //   case 1:
-    //     quizStyle2();
-    //     break;
-    //   case 2:
-    //     quizStyle3();
-    //     break;
-    //   case 3:
-    //     quizStyle4();
-    //     break;
-    //   case 4:
-    //     quizStyle5();
-    //     break;
-    // }
+    switch(quizStyle){
+      case 0:
+        quizStyle1();
+        break;
+      case 1:
+        quizStyle2();
+        break;
+      case 2:
+        quizStyle3();
+        break;
+      case 3:
+        quizStyle4();
+        break;
+      case 4:
+        quizStyle5();
+        break;
+    }
   }
 }
 
@@ -350,46 +348,38 @@ function quizStyle1() {
     
   }
   function quizStyle5(){
-    
     console.log("5, ask for gender")
     const eligibleVocab = filteredVocabList.filter(entry => entry.gender&& entry.gender!=""&&entry.gender!="undefined");
-    const numberOfDifferentTypes = new Set(filteredVocabList.map(item => item.gender)).size;
-    console.log("numberOfDifferentTypes",numberOfDifferentTypes)
+    const gendersInTheCollection =[...new Set(
+      eligibleVocab
+        .filter(item => item.gender && item.gender !== "" && item.gender !== "undefined") // Filter out items without "book" or where "book" is "a"
+        .map(item => item.gender) 
+    )];
+    console.log("gendersInTheCollection",gendersInTheCollection);
     console.log(eligibleVocab)
-    const eligibleOptions = filteredVocabList.filter(entry => entry.gender&& entry.gender!=""&&entry.gender!="undefined");
-  
-    if (eligibleVocab.length < 1 || numberOfDifferentTypes <2) {
+    if (eligibleVocab.length < 1 || gendersInTheCollection.size <2) {
       quizStyle2();
       return;
     }
-    if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
-      currentVocabIndex = 0;
-    } else {
-      currentVocabIndex = Math.floor(Math.random() * eligibleVocab.length);
-      console.log(eligibleVocab[currentVocabIndex]);
-    }
-    const quizIndex = Math.floor(Math.random() * eligibleVocab.length);
-    const correctVocab = eligibleVocab[quizIndex];
+    eligibleVocabIndex = Math.floor(Math.random() * eligibleVocab.length);
+    const correctVocab = eligibleVocab[eligibleVocabIndex];
+    currentVocabIndex =  filteredVocabList.findIndex(listItem => 
+      listItem.word === correctVocab.word && listItem.definition === correctVocab.definition
+    );
+    console.log(filteredVocabList[currentVocabIndex])
+    console.log(correctVocab);
     currentQuizWord = correctVocab.word;
-    currentQuizDefinition = correctVocab.gender.toLowerCase();
+    currentQuizDefinition = correctVocab.gender;
     quizType = 'truefalse';
-    
+    console.log(currentQuizDefinition);
     isPairCorrect = Math.random() < 0.5;
-    
-    if (!isPairCorrect) {
-      let incorrectVocab;
-      do {
-        const randomIndex = Math.floor(Math.random() * eligibleOptions.length);
-        incorrectVocab = eligibleOptions[randomIndex];
-      } 
-      while (incorrectVocab.word === currentQuizWord);
-      do {
-        const randomIndex = Math.floor(Math.random() * eligibleOptions.length);
-        incorrectVocab = eligibleOptions[randomIndex];
-      } 
-      while (incorrectVocab.gender.toLowerCase() === currentQuizWord.gender.toLowerCase());
-      
+    if(!isPairCorrect){
+      currentQuizDefinition = gendersInTheCollection[Math.floor(Math.random()*gendersInTheCollection.length)];
+      while(currentQuizDefinition===correctVocab.gender){
+        currentQuizDefinition = gendersInTheCollection[Math.floor(Math.random()*gendersInTheCollection.length)];
+      }
     }
+    
       document.getElementById('quizQuestion').textContent = `What is the gender of "${correctVocab.word}"?`;
     
     document.getElementById('trueFalseQuestion').textContent = `Is the gender of "${currentQuizWord}" "${currentQuizDefinition}"?`;
@@ -403,7 +393,6 @@ function quizStyle1() {
     document.getElementById('correctDefinition').style.display = 'none';
     document.getElementById('nextAfterIncorrectButton').style.display = 'none';
     }
-  
   function checkAnswer(button) {
     const correctAnswer = document.getElementById('quizContainer').dataset.correctAnswer;
     const correctMessage = document.getElementById('correctMessage');
@@ -461,7 +450,6 @@ function quizStyle1() {
       }, 500);
     } else {
       updateQuizResults('f');
-  
       incorrectMessage.style.display = 'block';
       showCorrectAnswer();
       document.getElementById('nextAfterIncorrectButton').style.display = 'block';

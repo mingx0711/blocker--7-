@@ -23,9 +23,6 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
     // Append the new word, definition, snoozed field, and seen field
     vocabList.push({ word, definition, snoozed: false , book, gender,pronounciation,seen: 0, quizResults: ['n','n','n','n']});
     // Save updated vocab list to Chrome storage
-    vocabList.map(item => {
-      return { ...item, book: item.gender.toLowerCase() };
-    });
     chrome.storage.local.set({ vocabList: vocabList }, function() {
       updateVocabList(vocabList);
 
