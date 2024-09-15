@@ -64,6 +64,20 @@ function updateVocabList(vocabList, collection = ["all"]) {
       wordDiv.style.width = '20vw';
       wordDiv.style.fontSize = '160%';
       wordDiv.style.marginRight  = '10px';
+      
+      if(entry.pronounciation!=""&&entry.pronounciation!=undefined){
+        const pronounciationDiv = document.createElement('div');
+        pronounciationDiv.textContent =  `${entry.pronounciation}`;
+        pronounciationDiv.style.fontSize = '70%';
+        wordDiv.appendChild(pronounciationDiv);
+      }
+      if(entry.gender!=""&&entry.gender!=undefined){
+        const genderDiv = document.createElement('div');
+        genderDiv.textContent =  `${entry.gender}`;
+        genderDiv.style.fontSize = '60%';
+        wordDiv.appendChild(genderDiv);
+      }
+
 
  
       const definitionDiv = document.createElement('div');
