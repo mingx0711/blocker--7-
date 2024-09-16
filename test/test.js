@@ -224,7 +224,6 @@ function quizStyle1() {
     document.getElementById('correctDefinition').style.display = 'none';
     document.getElementById('nextAfterIncorrectButton').style.display = 'none';
   }
-  
   function checkAnswer(button) {
     const correctAnswer = document.getElementById('quizContainer').dataset.correctAnswer;
     const correctMessage = document.getElementById('correctMessage');

@@ -768,11 +768,11 @@ function showCorrectAnswer() {
 
     vocabFlashcard.textContent = `${correctVocab.word}: ${correctVocab.definition}`;
     if(correctVocab.gender && correctVocab.gender!=""){
-      vocabFlashcard.textContent+= "gender:"
+      vocabFlashcard.textContent+= " gender:"
       vocabFlashcard.textContent+= correctVocab.gender
     }
     if(correctVocab.pronounciation && correctVocab.pronounciation!=""){
-      vocabFlashcard.textContent+= "pronounciation:"
+      vocabFlashcard.textContent+= " pronounciation:"
       vocabFlashcard.textContent+= correctVocab.pronounciation
     }
     document.getElementById('quizContainer').style.display = 'none';
