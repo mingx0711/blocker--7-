@@ -21,6 +21,17 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 1000;
         }
+    #floatingWindow {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 20px;
+        background-color: #f44336; /* Red color for error */
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        display: none; /* Hidden by default */}
     .close-button {
         float: right;
         cursor: pointer;
@@ -63,6 +74,7 @@
     <option value="seen">Sort by Least amount of time seen</option>
     <option value="newest">Sort by Newest</option>
   </select>
+  <button class="ui button basic" id="importButton">Import word and conjugation from Wiktionary</button>
   <button class="ui button basic" id="startTestButton"> Test your weak vocabs! </button>
   <button class="ui button basic" id="importVocabButton"> Import vocabs </button>
   <button class="ui button basic" id="exportToExcel"> Export vocabs to excel</button>
@@ -81,6 +93,7 @@
     <select class = "ui search dropdown" id="bookSelector2" style="margin:auto; margin-top: 5px; width:100px ;margin-bottom: 5px;display: block;">
     </select>
   </div>
+  <div id="floatingWindow">The vocabulary is not valid, please check your spelling.</div>
   <button class="ui button basic" id="manageBookButton">Manage Collection </button>
   <form  class = "ui center aligned basic segment" style = "flex-wrap: wrap;" id="addVocabForm">
     <div class="ui input"> 

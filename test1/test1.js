@@ -134,27 +134,29 @@ function showNextItem() {
     document.getElementById('nextButton').style.display = 'none';
     document.getElementById('quizContainer').style.display = 'none';
     document.getElementById('trueFalseContainer').style.display = 'none';
-    console.log("vocabList");
-
-    const quizStyle = Math.floor(Math.random() * 5);
-    console.log(quizStyle);
-    switch(quizStyle){
-      case 0:
-        quizStyle1();
-        break;
-      case 1:
-        quizStyle2();
-        break;
-      case 2:
-        quizStyle3();
-        break;
-      case 3:
-        quizStyle4();
-        break;
-      case 4:
-        quizStyle5();
-        break;
-    }
+    quizStyle6();
+    // const quizStyle = Math.floor(Math.random() * 5);
+    // console.log(quizStyle);
+    // switch(quizStyle){
+    //   case 0:
+    //     quizStyle1();
+    //     break;
+    //   case 1:
+    //     quizStyle2();
+    //     break;
+    //   case 2:
+    //     quizStyle3();
+    //     break;
+    //   case 3:
+    //     quizStyle4();
+    //     break;
+    //   case 4:
+    //     quizStyle5();
+    //     break;
+    //   case 5:
+    //     quizStyle6();
+    //     break;
+    // }
   }
 }
 
@@ -166,16 +168,11 @@ function quizStyle1() {
     currentVocabIndex = Math.floor(Math.random() * filteredVocabList.length);
     console.log(filteredVocabList[currentVocabIndex]);
   }
-  console.log(filteredVocabList[currentVocabIndex].word);
-
   const correctVocab = filteredVocabList[currentVocabIndex];
   currentQuizWord = correctVocab.word;
   currentQuizDefinition = correctVocab.definition;
   quizType = 'definition';
-
   const options = [correctVocab.definition];
-  
-  console.log(filteredVocabList[currentVocabIndex].word);
   console.log(options);
   for (let i = 0; i<3;i++) {    
     const randomIndex = Math.floor(Math.random() * filteredVocabList.length);
@@ -357,17 +354,15 @@ function quizStyle1() {
     )];
     console.log("gendersInTheCollection",gendersInTheCollection);
     console.log(eligibleVocab)
-    if (eligibleVocab.length < 1 || gendersInTheCollection.size <2) {
+    if (eligibleVocab.length <= 1 || gendersInTheCollection.size <2) {
       quizStyle2();
       return;
-    }
-    eligibleVocabIndex = Math.floor(Math.random() * eligibleVocab.length);
+    }else{
+      eligibleVocabIndex = Math.floor(Math.random() * eligibleVocab.length);
     const correctVocab = eligibleVocab[eligibleVocabIndex];
     currentVocabIndex =  filteredVocabList.findIndex(listItem => 
       listItem.word === correctVocab.word && listItem.definition === correctVocab.definition
     );
-    console.log(filteredVocabList[currentVocabIndex])
-    console.log(correctVocab);
     currentQuizWord = correctVocab.word;
     currentQuizDefinition = correctVocab.gender;
     quizType = 'truefalse';
@@ -381,18 +376,63 @@ function quizStyle1() {
     }
     
       document.getElementById('quizQuestion').textContent = `What is the gender of "${correctVocab.word}"?`;
-    
-    document.getElementById('trueFalseQuestion').textContent = `Is the gender of "${currentQuizWord}" "${currentQuizDefinition}"?`;
-    
-    // Show true/false quiz and hide vocab card
-    document.getElementById('trueFalseContainer').style.display = 'block';
-    document.getElementById('quizContainer').style.display = 'none';
-    document.getElementById('vocabFlashcard').style.display = 'none';
-    document.getElementById('correctMessage').style.display = 'none';
-    document.getElementById('incorrectMessage').style.display = 'none';
-    document.getElementById('correctDefinition').style.display = 'none';
-    document.getElementById('nextAfterIncorrectButton').style.display = 'none';
+      
+      document.getElementById('trueFalseQuestion').textContent = `Is the gender of "${currentQuizWord}" "${currentQuizDefinition}"?`;
+      
+      // Show true/false quiz and hide vocab card
+      document.getElementById('trueFalseContainer').style.display = 'block';
+      document.getElementById('quizContainer').style.display = 'none';
+      document.getElementById('vocabFlashcard').style.display = 'none';
+      document.getElementById('correctMessage').style.display = 'none';
+      document.getElementById('incorrectMessage').style.display = 'none';
+      document.getElementById('correctDefinition').style.display = 'none';
+      document.getElementById('nextAfterIncorrectButton').style.display = 'none';
     }
+    
+    }
+function quizStyle6(){
+  // Quiz Style 1: Ask for the definition of a word
+  if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
+    currentVocabIndex = 0;
+  } else {
+    currentVocabIndex = Math.floor(Math.random() * filteredVocabList.length);
+    console.log(filteredVocabList[currentVocabIndex]);
+  }
+  const correctVocab = filteredVocabList[currentVocabIndex];
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = correctVocab.definition;
+  quizType = 'definition';
+  const options = [correctVocab.definition];
+  console.log(options);
+  for (let i = 0; i<3;i++) {    
+    const randomIndex = Math.floor(Math.random() * filteredVocabList.length);
+    const randomDefinition = filteredVocabList[randomIndex].definition;
+    if (!options.includes(randomDefinition)) {
+      options.push(randomDefinition);
+    }else{
+      i--;
+    }
+  }
+
+  shuffleArray(options);
+  console.log(filteredVocabList[currentVocabIndex].word);
+
+  document.getElementById('quizQuestion').textContent = `What is the definition of "${correctVocab.word}"?`;
+  document.getElementById('option1').textContent = options[0];
+  document.getElementById('option2').textContent = options[1];
+  document.getElementById('option3').textContent = options[2];
+  document.getElementById('option4').textContent = options[3];
+
+  document.getElementById('quizContainer').dataset.correctAnswer = correctVocab.definition;
+
+  // Show quiz and hide vocab card
+  document.getElementById('quizContainer').style.display = 'block';
+  document.getElementById('vocabFlashcard').style.display = 'none';
+  document.getElementById('correctMessage').style.display = 'none';
+  document.getElementById('incorrectMessage').style.display = 'none';
+  document.getElementById('correctDefinition').style.display = 'none';
+  document.getElementById('nextAfterIncorrectButton').style.display = 'none';
+}
   function checkAnswer(button) {
     const correctAnswer = document.getElementById('quizContainer').dataset.correctAnswer;
     const correctMessage = document.getElementById('correctMessage');

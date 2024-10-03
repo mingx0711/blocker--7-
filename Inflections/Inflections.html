@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"> 
+<title>Add vocab inflections</title>
+<style>
+      #floatingWindow {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 20px;
+        background-color: #f44336; /* Red color for error */
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        display: none; /* Hidden by default */}
+</style>
+<link rel="stylesheet" href="../libs/semantic.css">
+
+</head>
+<body>
+<h2>Import vocabs and its conjugations</h2>
+<div>
+  <div class="ui input" style="margin: auto;display: flex;margin-top:15%;justify-content: center;"> 
+    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "monstrum" placeholder="Enter a word by its original form">
+  </div>
+  <div id="languageSelection" style="margin: auto;display: inline-block;justify-content: center;"></div>
+<p>Only support auto import for Latin&German</p>
+<p>For latin: enter a word by its first person singlar present form, for example moneo</p>
+<select class = "ui search dropdown" type="text" style="margin: auto;display: inline-block;justify-content: center;"class = "ui dropdown" id="selectLanguage" >  
+<option value="latin">Latin</option>
+<option value="german">German</option>
+</select>
+<div style="margin: auto;display: inline-block;justify-content: center;"class="ui input"> 
+  <select class = "ui search dropdown" type="text" id="gender" >
+    <option value=""></option>
+    <option value="neuter">neuter</option>
+    <option value="common">common</option>
+    <option value="feminine">feminine</option>
+    <option value="masculine">masculine</option>
+  </select>
+</div>
+<div class="ui input"style="margin: auto;display: inline-block;justify-content: center;"> 
+  <input type="text" id="pronounciation" placeholder="pronounciation (optional)"/>
+</div>
+<select class = "ui search dropdown" id="bookSelector" style="margin:auto; margin-top: 5px;margin-bottom: 5px;display: inline-block;">
+</select>
+<button class = "ui button"id="lookupButton">Lookup</button>
+<button class = "ui button"id="submit" style = "display:none">Looks good, add to database</button>
+</div>
+<div id="result"></div>
+</div>
+<div id="floatingWindow">The vocabulary is not valid, please check your spelling.</div>
+<script src="Inflections.js"></script>
+</body>

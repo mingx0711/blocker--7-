@@ -25,13 +25,14 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
     // Save updated vocab list to Chrome storage
     chrome.storage.local.set({ vocabList: vocabList }, function() {
       updateVocabList(vocabList);
-
       // Clear form fields
       document.getElementById('addVocabForm').reset();
     });
   });
 });
-
+document.getElementById("importButton").addEventListener("click", function() {
+  chrome.tabs.create({ url: 'inflections/inflections.html' });
+});
 document.getElementById('clearButton').addEventListener('click', function() {
   chrome.storage.local.clear(function() {
     console.log('Chrome storage local data cleared');
