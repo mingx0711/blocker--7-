@@ -29,21 +29,33 @@ function getLatinAttributes(doc,word){
   document.getElementById('submit').display = 'none'
   document.getElementById('result').innerHTML = '';
   let conjugations = {};
-  const verbInflectionTable = doc.querySelector('.inflection-table.vsSwitcher');
+
+  let verbInflectionTable = doc.querySelector('.inflection-table.vsSwitcher tbody tr th i[lang="la"]');
+  if(!verbInflectionTable){
+    verbInflectionTable = doc.querySelector('.inflection-table.vsSwitcher');
+  }
   conjugations.group = [];
   if (verbInflectionTable) {
-    let anchorElements = doc.querySelectorAll('#mw-content-text > div.mw-content-ltr.mw-parser-output > table > tbody > tr:nth-child(1) > th a[href]');
-    anchorElements.forEach((anchor) => {
-      conjugations.group.push(anchor.textContent);
-      console.log(anchor.textContent.trim());  // Output the href attribute value of each <a> element
-    });
-    console.log(conjugations.group)
-    let listItem = doc.querySelector('#mw-content-text > div.mw-content-ltr.mw-parser-output > ol > li:nth-child(1)');
-    listItem.querySelectorAll('span, dl,ul').forEach(el => el.remove());
+    let anchorElement = doc.querySelector('#mw-content-text > div.mw-content-ltr.mw-parser-output > table > tbody > tr:nth-child(1) > th a[href]');
+    conjugations.group.push(anchorElement.textContent);
+   
+    let definition = ""
+    const paragraph = doc.querySelector('p span > strong[lang="la"].Latn.headword');
+    if (paragraph) {
+      const parentParagraph = paragraph.closest('p');
+      const nextOl = parentParagraph.nextElementSibling;
+      console.log(nextOl)
+      if (nextOl) {
+        const firstListItem = nextOl.querySelector('li');
+        firstListItem.querySelectorAll('span, dl,ul').forEach(el => el.remove());
+        definition = firstListItem.textContent.trim();
+        console.log(definition)
+      }
+    }
     let conjugationText = conjugations.group.join(', ');
-    let definition = listItem.textContent.trim();
     // Select the <span> element
     let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
+    conjugations.pos = 'verb'
     conjugations.number = {singular:[],plural:[]}
     conjugations.person = {first:[],second:[],third:[]}
     conjugations.tense = {pres:[],impf:[],perf:[],fut:[],plup:[],futp:[],sigm:[],aor:[]}
@@ -84,7 +96,6 @@ function getLatinAttributes(doc,word){
       }
     });
     document.getElementById('submit').style.display = 'block'
-    document.getElementById('result').innerHTML += definition;
     document.getElementById('result').innerHTML += "<br />";
     document.getElementById('result').innerHTML += conjugationText;
     document.getElementById('result').innerHTML += "<br />";
@@ -92,14 +103,19 @@ function getLatinAttributes(doc,word){
     const book = document.getElementById('bookSelector').value;
     const pronounciation = document.getElementById('pronounciation').value;
     const gender = document.getElementById('gender').value;
-    conjugations.type = 'auto';
+    conjugations.type = 'latin';
     vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
     console.log(vocab)
     }
   else {
-    const nounInflectionTable = doc.querySelector('#mw-content-text > div.mw-content-ltr.mw-parser-output > table');
+    const nounInflectionTable = doc.querySelector('table.inflection-table-la');
     if(nounInflectionTable){
       const conjugations = {}
+      const declensionElement = doc.querySelector('a[href^="/wiki/Appendix:Latin_"][href*="declension"]');
+      if(declensionElement){
+        const declension = declensionElement.textContent
+        conjugations.group = declension
+      }
       conjugations.number = {singular:[],plural:[]}
       conjugations.case = {nom:[],gen:[],dat:[],acc:[],abl:[],voc:[]}
       let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
@@ -115,6 +131,10 @@ function getLatinAttributes(doc,word){
         }if(spanElement.className.includes('voc')){conjugations.case.voc.push(childText);
         }
       });
+      conjugations.type = 'latin';
+      conjugations.pos = 'noun';
+      document.getElementById('submit').style.display = 'block'
+
       document.getElementById('result').innerHTML += nounInflectionTable.outerHTML;
       console.log(conjugations)
     }
