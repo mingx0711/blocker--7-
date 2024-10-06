@@ -40,7 +40,6 @@ app.post('/addVocab', (req, res) => {
 });
 app.get('/fetch/:word', async (req, res) => {
   const word = req.params.word;
-  console.log(word);
   try {
       const fetch = await import('node-fetch'); // Dynamically import node-fetch
       const response = await fetch.default(`https://en.wiktionary.org/wiki/${word}`);

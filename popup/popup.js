@@ -103,3 +103,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
   });
   populateBookSelector()
 });
+document.getElementById("autoAdd").addEventListener("click", function() {
+  chrome.tabs.create({ url: 'inflections/inflections.html' });
+});

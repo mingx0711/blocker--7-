@@ -390,49 +390,179 @@ function quizStyle1() {
     }
     
     }
-function quizStyle6(){
-  // Quiz Style 1: Ask for the definition of a word
-  if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
-    currentVocabIndex = 0;
-  } else {
-    currentVocabIndex = Math.floor(Math.random() * filteredVocabList.length);
-    console.log(filteredVocabList[currentVocabIndex]);
-  }
-  const correctVocab = filteredVocabList[currentVocabIndex];
-  currentQuizWord = correctVocab.word;
-  currentQuizDefinition = correctVocab.definition;
-  quizType = 'definition';
-  const options = [correctVocab.definition];
-  console.log(options);
-  for (let i = 0; i<3;i++) {    
-    const randomIndex = Math.floor(Math.random() * filteredVocabList.length);
-    const randomDefinition = filteredVocabList[randomIndex].definition;
-    if (!options.includes(randomDefinition)) {
-      options.push(randomDefinition);
-    }else{
-      i--;
+    function getRandomKeys(obj, count) {
+        let keys = Object.keys(obj);
+        let selectedKeys = [];
+        for (let i = 0; i < count; i++) {
+            let randomKey = keys[Math.floor(Math.random() * keys.length)];
+            selectedKeys.push(randomKey);
+        }
+        return selectedKeys;
     }
-  }
+    function getRandomSubfield(obj) {
+        let keys = Object.keys(obj);
+        let randomKey = keys[Math.floor(Math.random() * keys.length)];
+        return randomKey;
+    }
+    function getRandomElement(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+    function getRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+    // Helper function to get random keys from an array
+    function getRandomKeysFromArray(array, count) {
+        let shuffled = array.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+      }
+      
+      // Helper function to get random subfield from an object
+      function getRandomSubfield(obj) {
+        const keys = Object.keys(obj);
+        const validKeys = keys.filter(field => (field !== 'pos')&&(field !== 'type'));
+        const randomKey = validKeys[Math.floor(Math.random() * keys.length)];
+        return randomKey;
+      }
+      
+      // Helper function to find common word across multiple lists
+      function findCommonWordAcrossLists(lists) {
+        const res = lists.reduce((a, b) => a.filter(c => b.includes(c))); // Get first common word or undefined
+        return res;
+      }
+    
+      function getRandomWordFromConjugations(conjugations,commonWordsList) {
+        let fields = Object.keys(conjugations);
+        const filteredFields = fields.filter(field => (field !== 'pos')&&(field !== 'type')&&(field !== 'group')&&(field !== 'group'));
+        const randomField = filteredFields[Math.floor(Math.random() * filteredFields.length)];
+        const subfields = Object.keys(conjugations[randomField]);
+        let randomSubfield = subfields[Math.floor(Math.random() * subfields.length)];
+        const words = conjugations[randomField][randomSubfield];
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+        console.log(randomField+":"+randomSubfield+":"+randomWord)
+        if(randomWord==undefined){
+          return getRandomWordFromConjugations(conjugations,commonWordsList);
+        }
+        const isInAllSubfields = commonWordsList.includes(randomWord)
+        if(randomWord.length<=1||randomWord==null||isInAllSubfields){
+          console.log(randomWord+" is not not a wrong answer")
+            return getRandomWordFromConjugations(conjugations,commonWordsList);
+        }else{    
+            return randomWord;}
+      }
+      
+    function quizStyle6(){
 
-  shuffleArray(options);
-  console.log(filteredVocabList[currentVocabIndex].word);
-
-  document.getElementById('quizQuestion').textContent = `What is the definition of "${correctVocab.word}"?`;
-  document.getElementById('option1').textContent = options[0];
-  document.getElementById('option2').textContent = options[1];
-  document.getElementById('option3').textContent = options[2];
-  document.getElementById('option4').textContent = options[3];
-
-  document.getElementById('quizContainer').dataset.correctAnswer = correctVocab.definition;
-
-  // Show quiz and hide vocab card
-  document.getElementById('quizContainer').style.display = 'block';
-  document.getElementById('vocabFlashcard').style.display = 'none';
-  document.getElementById('correctMessage').style.display = 'none';
-  document.getElementById('incorrectMessage').style.display = 'none';
-  document.getElementById('correctDefinition').style.display = 'none';
-  document.getElementById('nextAfterIncorrectButton').style.display = 'none';
-}
+      const eligibleVocab = filteredVocabList.filter(entry => entry.conjugations&& entry.conjugations.type!="");
+      if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
+        currentVocabIndex = 0;
+      } else {
+        currentVocabIndex = Math.floor(Math.random() * eligibleVocab.length);
+        console.log(eligibleVocab[currentVocabIndex]);
+      }
+      const correctVocab = eligibleVocab[currentVocabIndex];
+      const conjugations = correctVocab.conjugations;
+      conjToTest=[]
+      let numberOfFields=1;
+      let selectedField;
+      console.log(correctVocab.word)
+      if(conjugations.pos=="verb"){
+        const typeOfVerbToTest = getRandomNumber(1,10)
+        numberOfFields = getRandomNumber(1, 5);
+        const verbFields1 = ['mood','person','number', 'voice', 'tense'];
+        const verbFields2 = ['voice', 'tense','form'];
+        const verbFields3 = ['noun', 'case'];
+    
+        if(typeOfVerbToTest<=8){
+            selectedField = verbFields1
+        }else if(typeOfVerbToTest<=9){
+            selectedField = verbFields2
+        }else if(typeOfVerbToTest<=10){
+            selectedField = verbFields3
+        }    
+        }else{
+            console.log("not a verb")
+            numberOfFields = 2;
+            selectedField = ['case','number'];
+        }
+    
+        let selectedKeys = getRandomKeysFromArray(selectedField, numberOfFields);
+        let conjugationLists = [];
+        selectedKeys.forEach(field => {
+            const subfield = getRandomSubfield(conjugations[field]);
+            console.log(subfield)
+            conjToTest.push(subfield);
+            conjugationLists.push(conjugations[field][subfield]);
+          });
+        const commonWordsList = findCommonWordAcrossLists(conjugationLists);
+        const commonWord = commonWordsList[getRandomNumber(0,commonWordsList.length)];
+        if (!commonWord) {
+            console.log("No common word found, retrying...");
+            return quizStyle6(); // Restart quiz if no common word is found
+          }
+        console.log(conjugationLists)
+        console.log(commonWord)
+        const correctAnswer = commonWord; 
+        let wrongAnswers = [];
+        while (wrongAnswers.length < 3) {
+            const wrongWord = getRandomWordFromConjugations(conjugations,commonWordsList);
+            if(!wrongAnswers.includes(wrongWord)&&!(wrongWord==commonWord)){
+                wrongAnswers.push(wrongWord);
+                }
+            }
+        console.log(wrongAnswers)
+        currentQuizWord = correctVocab.word;
+        currentQuizDefinition = correctAnswer;
+        quizType = 'conjugation';
+        const options = [correctAnswer];
+        console.log(options);
+        for (let i = 0; i<3;i++) {
+            if (!options.includes(wrongAnswers)) {
+            options.push(wrongAnswers[i]);
+            }else{
+            i--;
+            }
+        }
+        currentVocabIndex = filteredVocabList.indexOf(correctVocab);
+        correctConj=correctAnswer;
+        shuffleArray(options);
+        let names = conjToTest.toString();
+        names = names.replace(/pres/g, 'present');
+        names = names.replace(/ind/g, 'indicative');
+        names = names.replace(/pass/g, 'passive');
+        names = names.replace(/fut/g, 'future');
+        names = names.replace(",perf,", ',perfect,');
+        names = names.replace(",impf,", ',imperfect,');
+        names = names.replace(",plup,", ',pluperfect,');
+        names = names.replace(/futp/g, 'future perfect');
+        names = names.replace(/sigm/g, 'sigmatic future');
+        names = names.replace(/aor/g, 'aoristic future');
+        names = names.replace(/act/g, 'active');
+        names = names.replace(/sub/g, 'subjunctive');
+        names = names.replace(/inf/g, 'infinitive');
+        names = names.replace(/part/g, 'participle');
+        names = names.replace(/ger/g, 'gerundive');
+        names = names.replace(/sup/g, 'supine');
+        names = names.replace(/gen/g, 'genitive');
+        names = names.replace(/abl/g, 'ablative');
+        names = names.replace(/acc/g, 'accusative');
+        names = names.replace(/dat/g, 'dative');
+    
+        document.getElementById('quizQuestion').textContent = `What is one ${names} form of the word "${correctVocab.word}"?`;
+        document.getElementById('option1').textContent = options[0];
+        document.getElementById('option2').textContent = options[1];
+        document.getElementById('option3').textContent = options[2];
+        document.getElementById('option4').textContent = options[3];
+    
+        document.getElementById('quizContainer').dataset.correctAnswer =correctAnswer;
+    
+        // Show quiz and hide vocab card
+        document.getElementById('quizContainer').style.display = 'block';
+        document.getElementById('vocabFlashcard').style.display = 'none';
+        document.getElementById('correctMessage').style.display = 'none';
+        document.getElementById('incorrectMessage').style.display = 'none';
+        document.getElementById('correctDefinition').style.display = 'none';
+        document.getElementById('nextAfterIncorrectButton').style.display = 'none';
+    }
   function checkAnswer(button) {
     const correctAnswer = document.getElementById('quizContainer').dataset.correctAnswer;
     const correctMessage = document.getElementById('correctMessage');
@@ -470,6 +600,14 @@ function quizStyle6(){
       if(correctVocab.pronounciation && correctVocab.pronounciation!=""){
         vocabFlashcard.textContent+= " pronounciation:"
         vocabFlashcard.textContent+= correctVocab.pronounciation
+      } 
+      if(conjToTest.length>0){
+        vocabFlashcard.textContent+= "\n"
+        vocabFlashcard.textContent+= correctConj
+        vocabFlashcard.textContent+= " is one of the "
+        vocabFlashcard.textContent+= conjToTest.toString()
+        vocabFlashcard.textContent+= "form of "
+        vocabFlashcard.textContent+= correctVocab.word
       }
       document.getElementById('quizContainer').style.display = 'none';
       vocabFlashcard.style.display = 'block';

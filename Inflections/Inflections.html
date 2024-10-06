@@ -23,12 +23,12 @@
 <h2>Import vocabs and its conjugations</h2>
 <div>
   <div class="ui input" style="margin: auto;display: flex;margin-top:15%;justify-content: center;"> 
-    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "porto" placeholder="Enter a word by its original form">
+    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "monstrum" placeholder="Enter a word by its original form">
   </div>
   <div id="languageSelection" style="margin: auto;display: inline-block;justify-content: center;"></div>
-<p>Only support auto import for Latin&German</p>
-<p>For latin: enter a word by its first person singlar present form, for example moneo</p>
-<select class = "ui search dropdown" type="text" style="margin: auto;display: inline-block;justify-content: center;"class = "ui dropdown" id="selectLanguage" >  
+<h3>   Only support auto import for Latin, german is on its way</h3>
+<h3>   For latin: enter a word by its base form for example moneo,levandus</h3>
+<select class = "ui search dropdown" type="text" style="margin: auto;display: inline-block;justify-content: center;margin-left: 5%;"class = "ui dropdown" id="selectLanguage" >  
 <option value="latin">Latin</option>
 <option value="german">German</option>
 </select>
@@ -49,7 +49,7 @@
 <button class = "ui button"id="lookupButton">Lookup</button>
 <button class = "ui button"id="submit" style = "display:none">Looks good, add to database</button>
 </div>
-<div id="result"></div>
+<div id="result" style = "margin: 5%;"></div>
 </div>
 <div id="floatingWindow">The vocabulary is not valid, please check your spelling.</div>
 <script src="Inflections.js"></script>
