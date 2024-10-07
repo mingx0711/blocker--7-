@@ -23,11 +23,14 @@
 <h2>Import vocabs and its conjugations</h2>
 <div>
   <div class="ui input" style="margin: auto;display: flex;margin-top:15%;justify-content: center;"> 
-    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "monstrum" placeholder="Enter a word by its original form">
+    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "moneo" placeholder="Enter a word by its original form">
   </div>
   <div id="languageSelection" style="margin: auto;display: inline-block;justify-content: center;"></div>
-<h3>   Only support auto import for Latin, german is on its way</h3>
+<h3>   Only supports auto import for Latin</h3>
 <h3>   For latin: enter a word by its base form for example moneo,levandus</h3>
+<h3>  If a word has multiple parts of speech the data collection MIGHT be wrong</h3>
+<h3>  In this case click definition is wrong, enter new definition then click add to database</h3>
+
 <select class = "ui search dropdown" type="text" style="margin: auto;display: inline-block;justify-content: center;margin-left: 5%;"class = "ui dropdown" id="selectLanguage" >  
 <option value="latin">Latin</option>
 <option value="german">German</option>
@@ -47,7 +50,10 @@
 <select class = "ui search dropdown" id="bookSelector" style="margin:auto; margin-top: 5px;margin-bottom: 5px;display: inline-block;">
 </select>
 <button class = "ui button"id="lookupButton">Lookup</button>
-<button class = "ui button"id="submit" style = "display:none">Looks good, add to database</button>
+<button class = "ui button"id="submit" style = "display:none;margin-left: 5%;">Add to database</button>
+<button class = "ui button"id="wrongDef" style = "display:none;margin-left: 5%;">definition is wrong</button>
+<input type="text" class = "ui input" id="newDef" style = "display:none;margin-left: 5%;font-size: 15px;" placeholder="Enter correct definition">
+
 </div>
 <div id="result" style = "margin: 5%;"></div>
 </div>

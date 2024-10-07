@@ -67,15 +67,18 @@
   <script lang="javascript" src="../libs/sheetsJS.js"></script>
 </head>
 <body>
-  <h1 class = "ui message" style = " font-size: 250%;">Manage Vocabulary List</h1>
+  <div class = "ui message"style="display: block; ">
+  <h1 class = "message" style = " font-size: 250%;display: inline-flex;margin-right: 20%;">Manage Vocabulary List</h1>
+  <button class="ui button basic" style = "display: inline-flex;"id="importButton">Import word and conjugation from Wiktionary</button>
+  <button class="ui button basic" style = "display: inline-flex;"id="startTestButton"> Test your weak vocabs! </button>
+  <button class="ui button basic" style = "display: inline-flex;"id="manageBookButton">Manage Collection </button>
+  </div>
   <select class="ui search dropdown" style = "padding-left: 10px;" id="sortOptions">
     <option value="">Sort by Default</option>
     <option value="incorrect">Sort by Amount of recent incorrect answers</option>
     <option value="seen">Sort by Least amount of time seen</option>
     <option value="newest">Sort by Newest</option>
   </select>
-  <button class="ui button basic" id="importButton">Import word and conjugation from Wiktionary</button>
-  <button class="ui button basic" id="startTestButton"> Test your weak vocabs! </button>
   <button class="ui button basic" id="testConj"> Practice your conjugations!Results wil not be recorded(beta) </button>
   <button class="ui button basic" id="importVocabButton"> Import vocabs </button>
   <button class="ui button basic" id="exportToExcel"> Export vocabs to excel</button>
@@ -95,7 +98,6 @@
     </select>
   </div>
   <div id="floatingWindow">The vocabulary is not valid, please check your spelling.</div>
-  <button class="ui button basic" id="manageBookButton">Manage Collection </button>
   <form  class = "ui center aligned basic segment" style = "flex-wrap: wrap;" id="addVocabForm">
     <div class="ui input"> 
       <input type="text" id="word" placeholder="Word" required />

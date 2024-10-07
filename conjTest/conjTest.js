@@ -9,6 +9,7 @@ let totalNoCount = null;
 let currentQuizNo = 0;
 let conjToTest = []
 let correctConj = ""
+let wordToTest=""
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('wrongCountDiv').style.display = 'none';
   document.getElementById('vocabFlashcard').style.display = 'none';
@@ -135,29 +136,16 @@ function showNextItem() {
     document.getElementById('nextButton').style.display = 'none';
     document.getElementById('quizContainer').style.display = 'none';
     document.getElementById('trueFalseContainer').style.display = 'none';
-    quizStyle7();
-    // const quizStyle = Math.floor(Math.random() * 5);
-    // console.log(quizStyle);
-    // switch(quizStyle){
-    //   case 0:
-    //     quizStyle1();
-    //     break;
-    //   case 1:
-    //     quizStyle2();
-    //     break;
-    //   case 2:
-    //     quizStyle3();
-    //     break;
-    //   case 3:
-    //     quizStyle4();
-    //     break;
-    //   case 4:
-    //     quizStyle5();
-    //     break;
-    //   case 5:
-    //     quizStyle6();
-    //     break;
-    // }
+    const quizStyle = Math.floor(Math.random() * 2);
+    console.log(quizStyle);
+    switch(quizStyle){
+      case 0:
+        quizStyle7();
+        break;
+      case 1:
+        quizStyle6();
+        break;
+    }
   }
 }
 
@@ -285,16 +273,16 @@ function getRandomKeysFromArray(array, count) {
       const subfield = item.subfield;
     
       // Check if the field already exists in the object
-      if (wordSubfields[field]) {
+      if (combinedSubfields[field]) {
         // If it exists, concatenate the subfields with "/"
-        wordSubfields[field] = `${combinedSubfields[field]}/${subfield}`;
+        combinedSubfields[field] +="/"+subfield;
       } else {
         // Otherwise, just set the subfield for this field
-        wordSubfields[field] = subfield;
+        combinedSubfields[field] = subfield;
       }
     });
     
-    return wordSubfields;
+    return combinedSubfields;
   }
 function makeStringReadable(names){
   names = names.replace(/pres/g, 'present');
@@ -317,6 +305,8 @@ function makeStringReadable(names){
   names = names.replace(/abl/g, 'ablative');
   names = names.replace(/acc/g, 'accusative');
   names = names.replace(/dat/g, 'dative');
+  names = names.replace("nom,",'nominative');
+  names = names.replace(/voc/g, 'vocative');
   return names
 }
 function quizStyle6(){
@@ -341,23 +331,26 @@ function quizStyle6(){
     correctAnswer =  conjugations.group;
     console.log(correctAnswer)
     options = [correctAnswer];
-    console.log(options);
     currentQuizWord = correctVocab.word;
-
+    if(Array.isArray(correctAnswer)){
+      correctAnswer = correctAnswer[0]
+    }
     let wrongAnswers = []
     if(conjugations.pos=="verb"){
-      wrongAnswers = ["first conjugation","second conjugation","third conjugation","fourth conjugation","irregular"]
+      wrongAnswers = ["first conjugation","second conjugation","third conjugation","fourth conjugation","irregular","first&second conjugation"]
     }else{
       wrongAnswers = ["first declension","second declension","third declension","fourth declension","fifth declension","irregular"]
     }
     for (let i = 0; i<3;i++) {
+      console.log(options)
         const index = getRandomNumber(1,wrongAnswers.length)
         if (!options.includes(wrongAnswers[index])) {
-        options.push(wrongAnswers[index]);
+          options.push(wrongAnswers[index]);
         }else{
           i--
         }
     }
+    quizType="groupTest"
   }else{
     if(conjugations.pos=="verb"){
       const typeOfVerbToTest = getRandomNumber(1,10)
@@ -417,7 +410,7 @@ function quizStyle6(){
       correctConj=correctAnswer;
       shuffleArray(options);
       let names = conjToTest.toString();
-      makeStringReadable(names)
+      names = makeStringReadable(names)
       questionText = `What is one ${names} form of the word "${correctVocab.word}"?`
   }
  
@@ -439,6 +432,7 @@ function quizStyle6(){
     document.getElementById('nextAfterIncorrectButton').style.display = 'none';
 }
 function quizStyle7(){
+  wordToTest=""
   const eligibleVocab = filteredVocabList.filter(entry => entry.conjugations&& entry.conjugations.type!="");
   if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
     currentVocabIndex = 0;
@@ -453,22 +447,20 @@ function quizStyle7(){
   let questionText = ""
   let options = []
   console.log(correctVocab.word)
-  const wordToTest = getRandomWordFromConjugations(conjugations)
+  wordToTest = getRandomWordFromConjugations(conjugations)
   const subFields = findSubfieldsForWord(wordToTest,conjugations)
-  console.log(subFields)
-  conjToTest=subFields.map(item => item.subfield)
+  conjToTest = Object.values(subFields);
   correctAnswer = conjToTest.toString(); 
   correctAnswer = makeStringReadable(correctAnswer);
   let wrongAnswers = [];
   while (wrongAnswers.length < 3) {
     const wrongWord = getRandomWordFromConjugations(conjugations);
     console.log(wrongWord)
-    const wrongConj = makeStringReadable(findSubfieldsForWord(wrongWord,conjugations).map(item => item.subfield).toString()); 
+    const wrongConj = makeStringReadable(Object.values(findSubfieldsForWord(wrongWord,conjugations)).toString()); 
     if(!wrongAnswers.includes(wrongConj)&&!(wrongConj==correctAnswer)){
         wrongAnswers.push(wrongConj);
         }
     }
-  console.log(wrongAnswers)
   currentQuizWord = correctVocab.word;
   currentQuizDefinition = correctAnswer;
   quizType = 'conjugation';
@@ -484,7 +476,7 @@ function quizStyle7(){
   correctConj=correctAnswer;
   shuffleArray(options);
  
-  questionText = `What type conjugation doe  the word "${wordToTest}" belong to?`
+  questionText = `What type of conjugation doe  the word "${wordToTest}" belong to?`
 
 
 
@@ -552,14 +544,24 @@ function quizStyle7(){
         vocabFlashcard.textContent+= "\n"
         vocabFlashcard.textContent+= " group: "
         vocabFlashcard.textContent+= correctVocab.conjugations.group
-      }
-      if(conjToTest&&conjToTest.length>0){
+      } if(conjToTest.length>0&&wordToTest.length==0){
         vocabFlashcard.textContent+= "\n"
         vocabFlashcard.textContent+= correctConj
         vocabFlashcard.textContent+= " is one of the "
         vocabFlashcard.textContent+= conjToTest.toString()
         vocabFlashcard.textContent+= "form of "
         vocabFlashcard.textContent+= correctVocab.word
+      }if(conjToTest.length>0&&wordToTest.length>0){
+        vocabFlashcard.textContent+= "\n"
+        vocabFlashcard.textContent+= wordToTest
+        vocabFlashcard.textContent+= " is one of the "
+        vocabFlashcard.textContent+= conjToTest.toString()
+        vocabFlashcard.textContent+= " form of "
+        vocabFlashcard.textContent+= correctVocab.word
+      }if(quizType=="groupTest"){
+        vocabFlashcard.textContent+= "\n"
+        vocabFlashcard.textContent+= " group: "
+        vocabFlashcard.textContent+= correctVocab.conjugations.group
       }
       document.getElementById('quizContainer').style.display = 'none';
       vocabFlashcard.style.display = 'block';

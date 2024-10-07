@@ -9,7 +9,7 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
     const wordRaw = document.getElementById('wikiEntry').value;
     const language = document.getElementById('selectLanguage').value;
     const word = wordRaw.replaceAll('ō', 'o').replaceAll('ā', 'a')
-
+    document.getElementById('wrongDef').style.display="block";
     console.log(word,language)
     if (word && language) {
         // Call the backend server instead of Wiktionary directly
@@ -28,7 +28,7 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
       }});
     
 function getLatinAttributes(doc,word){
-  try{
+  //try{
   document.getElementById('submit').display = 'none'
   document.getElementById('result').innerHTML = '';
   const book = document.getElementById('bookSelector').value;
@@ -36,36 +36,39 @@ function getLatinAttributes(doc,word){
   const gender = document.getElementById('gender').value;
   let conjugations = {};
   vocab = {}
+  let verbInflectionTable;
   let iTableLocator = doc.querySelector('.inflection-table.vsSwitcher tbody tr th i[lang="la"]');
-  let th = iTableLocator.parentElement;
-  let tr = th.parentElement;
-  let tbody = tr.parentElement;
-  const verbInflectionTable=tbody.parentElement;
-  if(!verbInflectionTable){
-    console.log("ermmmmm")
-    verbInflectionTable = doc.querySelectorAll('.inflection-table.vsSwitcher');
+  if(iTableLocator){
+    let th = iTableLocator.parentElement;
+    let tr = th.parentElement;
+    let tbody = tr.parentElement;
+    verbInflectionTable=tbody.parentElement;
   }
-  conjugations.group = [];
+
   if (verbInflectionTable) {
-    console.log(verbInflectionTable)
     let anchorElement = doc.querySelector('#mw-content-text > div.mw-content-ltr.mw-parser-output > table > tbody > tr:nth-child(1) > th a[href]');
     if(!anchorElement){
        document.getElementById('result').innerHTML += "No such words"
     }
-    conjugations.group.push(anchorElement.textContent);
+    conjugations.group=anchorElement.textContent;
     let definition = ""
     const paragraph = doc.querySelector('p span > strong[lang="la"].Latn.headword');
     if (paragraph) {
       const parentParagraph = paragraph.closest('p');
       const nextOl = parentParagraph.nextElementSibling;
-      console.log(nextOl)
       if (nextOl) {
         const firstListItem = nextOl.querySelector('li');
         firstListItem.querySelectorAll('span, dl,ul').forEach(el => el.remove());
-        definition = firstListItem.textContent.trim();
+        rawDef = firstListItem.textContent.trim();
+        if(rawDef.includes('.mw')){
+          definition= rawDef.slice(0, definition.indexOf('.mw')).trim();
+        }else{
+          definition= rawDef.trim();
+        }
       }
     }
-    let conjugationText = conjugations.group.join(', ');
+    console.log(definition)
+    let conjugationText = conjugations.group;
     // Select the <span> element
     let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
     conjugations.pos = 'verb'
@@ -120,12 +123,21 @@ function getLatinAttributes(doc,word){
     }
   else {
     const nounInflectionTable = doc.querySelector('table.inflection-table-la');
+    console.log(nounInflectionTable)
     if(nounInflectionTable){
       const conjugations = {}
-      const declensionElement = doc.querySelector('a[href^="/wiki/Appendix:Latin_"][href*="declension"]');
-      if(declensionElement){
-        const declension = declensionElement.textContent
+      let declension = ""
+      const declensionElements = doc.querySelectorAll('a[href^="/wiki/Appendix:Latin_"][href*="declension"]');
+     
+      if(declensionElements){
+        const declensionElementsLength = declensionElements.length/2
+        for(let i = 0;i<declensionElementsLength;i++){
+          declension+=declensionElements[i].textContent
+        }
+        declension = declension.replaceAll("firstsecond","first&second").replaceAll("-"," ")
+        console.log(declension)
         conjugations.group = declension
+        console.log(declension)
         document.getElementById('result').innerHTML +=  `<span style="font-size: 20px; display:"block";margin-left:5%>declension: ${declension}</span>`
       }
       let closestOl = null;
@@ -144,7 +156,6 @@ function getLatinAttributes(doc,word){
       const firstListItem = sibling.querySelector('li');
       firstListItem.querySelectorAll('dl,ul').forEach(el => el.remove());
       definition = firstListItem.textContent.trim();
-      console.log(definition)
       conjugations.number = {singular:[],plural:[]}
       conjugations.case = {nom:[],gen:[],dat:[],acc:[],abl:[],voc:[]}
       let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
@@ -163,20 +174,21 @@ function getLatinAttributes(doc,word){
       conjugations.type = 'latin';
       conjugations.pos = 'noun';
       document.getElementById('submit').style.display = 'block'
+      document.getElementById('wrongDef').style.display = 'block'
+
       document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;display:"block";margin-left:5%>,definition:${definition}</span>`
       document.getElementById('result').innerHTML += nounInflectionTable.outerHTML;
       vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
 
-      console.log(conjugations)
+      console.log(vocab)
     }else{ document.getElementById('result').style.display = 'block'
     document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
     }
   }
-  }catch(error){
-    document.getElementById('result').style.display = 'block'
-    document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
-
-  }
+  // }catch(error){
+  // //   document.getElementById('result').style.display = 'block'
+  // //   document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+  // }
 }
   function populateBookSelector() {
     chrome.storage.sync.get({ bookList: [] }, (result) => {
@@ -209,9 +221,17 @@ function getLatinAttributes(doc,word){
 
 document.addEventListener('DOMContentLoaded', (event) => {
   const submitButton = document.getElementById('submit'); 
+  const wrongDefButton = document.getElementById('wrongDef'); 
+
   if (submitButton) {
+
+    
     // Attach click event listener
     submitButton.addEventListener('click', function() {
+      console.log(document.getElementById("newDef").value)
+      if(document.getElementById("newDef").value && document.getElementById("newDef").value!="Enter correct definition"){
+        vocab.definition = document.getElementById('newDef').value
+      }
       chrome.storage.local.get('vocabList', function(data) {    
         let vocabList = data.vocabList || [];
         console.log(vocabList)
@@ -221,9 +241,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
       });  
       alert("Pushed");
       submitButton.style.display="none"
+      document.getElementById('wrongDef').style.display = 'none'
+      document.getElementById('newDef').style.display = 'none'
     });
   } else {
     submitButton.log("Button not found!");
   }
+  wrongDefButton.addEventListener('click', function() {
+    document.getElementById('newDef').style.display="inline-block"; 
+    console.log(vocab)
+  });
+
   populateBookSelector()
 });
