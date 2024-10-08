@@ -21,7 +21,7 @@
       <input type="text" id="word" placeholder="Word" required />
     </div>
     <div class="ui input"> 
-      <input type="text" id="definition" placeholder="Definition" required />
+      <input type="text" id="definition" placeholder="Definition"/>
     </div>
     <div style="display: block;"class="ui input"> 
       <select class = "ui search dropdown" type="text" id="gender" >
@@ -43,11 +43,14 @@
       <button class="ui teal basic button"style = "margin-top:5px;margin-bottom: 5px ;" id="addBookButton">Add collection</button>
     </div>
     <button style = "display: Block;margin-left: auto;margin-right: auto;" class = "ui button" type="submit">Add</button>
+    <div style = "border: 1px double;border-color: #5a4f4d; border-radius: 2%;margin-top: 2%;">
+      <div style = "margin-left: 10%;"class = "ui container" id="vocabInfo"></div>
+      <button style = "display: none;margin-left: auto;margin-right: auto;" class = "ui button" id= "addAuto">Add to database</button>
+    </div>
   </form>
-  <button style = "display: Block;margin-top:5%;margin-left: auto;margin-right: auto;" class = "ui button" id="autoAdd">to auto add page(latin only)</button>
-
-  <div class = "ui container" id="message"></div>
-  <button style = "display: Block;margin-left: auto;margin-right: auto;"class="ui button" id="manageButton">Manage Vocabulary List</button>
+  <div style = "margin-left: 10%;border: 1px;border-radius:2%;"class = "ui container" id="message"></div>
+  <button style = "display: Block;margin-top:1%;margin-left: auto;margin-right: auto;" class = "ui button" id="autoAdd">to auto add page(latin only)</button>
+  <button style = "display: Block;margin-top:1%;margin-left: auto;margin-right: auto;"class="ui button" id="manageButton">Manage Vocabulary List</button>
   <script src="../libs/semantic.css"></script>
   <script src="popup.js"></script>
 </body>

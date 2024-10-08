@@ -39,12 +39,13 @@ app.post('/addVocab', (req, res) => {
   res.json({ csvData });
 });
 app.get('/fetch/:word', async (req, res) => {
-  const word = req.params.word;
+  const word = req.params.word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ā', 'a');
   try {
       const fetch = await import('node-fetch'); // Dynamically import node-fetch
       const response = await fetch.default(`https://en.wiktionary.org/wiki/${word}`);
       const text = await response.text();
       res.send(text);
+      console.log("success "+word)
   } catch (error) {
       res.status(500).send('Error fetching from Wiktionary');
   }
