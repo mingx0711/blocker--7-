@@ -1,4 +1,5 @@
 let vocab = {}
+let baseDef = {}
 document.getElementById('selectLanguage').addEventListener('change', function() {
     let selectedLanguage = this.value;  // Get the selected value
     let word = document.getElementById("wikiEntry").value;
@@ -31,6 +32,7 @@ function getLatinAttributes(doc,word){
   //try{
   document.getElementById('submit').display = 'none'
   document.getElementById('result').innerHTML = '';
+  document.getElementById('resultForInfs').innerHTML = '';
   const book = document.getElementById('bookSelector').value;
   const pronounciation = document.getElementById('pronounciation').value;
   const gender = document.getElementById('gender').value;
@@ -67,6 +69,7 @@ function getLatinAttributes(doc,word){
         }
       }
     }
+    baseDef = definition
     console.log(definition)
     let conjugationText = conjugations.group;
     // Select the <span> element
@@ -74,12 +77,12 @@ function getLatinAttributes(doc,word){
     conjugations.pos = 'verb'
     conjugations.number = {singular:[],plural:[]}
     conjugations.person = {first:[],second:[],third:[]}
-    conjugations.tense = {pres:[],impf:[],perf:[],fut:[],plup:[],futp:[],sigm:[],aor:[]}
-    conjugations.voice = {act:[],pass:[]}
-    conjugations.mood = {ind:[],sub:[],imperative:[]}
-    conjugations.form = {inf:[],part:[]}
-    conjugations.noun = {ger:[],sup:[]}
-    conjugations.case = {gen:[],abl:[],acc:[],dat:[]}
+    conjugations.tense = {present:[],imperfect:[],perfect:[],future:[],pluperfect:[],futurePerfect:[],sigmaticFuture:[],aorist:[]}
+    conjugations.voice = {active:[],passive:[]}
+    conjugations.mood = {indicative:[],subjunctive:[],imperative:[]}
+    conjugations.form = {infinitive:[],participle:[]}
+    conjugations.noun = {gerundive:[],supine:[]}
+    conjugations.case = {genitive:[],ablative:[],accusative:[],dative:[]}
 
     spanElements.forEach((spanElement) => {
       let childText = spanElement.firstElementChild.textContent;
@@ -88,27 +91,27 @@ function getLatinAttributes(doc,word){
       if(spanElement.className.includes('3')){conjugations.person.third.push(childText);}
       if(spanElement.className.includes('|s|')){conjugations.number.singular.push(childText);
       }if(spanElement.className.includes('|p|')){conjugations.number.plural.push(childText);
-      }if(spanElement.className.includes('pres')){ conjugations.tense.pres.push(childText);
-      }if(spanElement.className.includes('impf')){conjugations.tense.impf.push(childText);
-      }if(spanElement.className.includes('fut')){conjugations.tense.fut.push(childText);
-      }if(spanElement.className.includes('perf')){conjugations.tense.perf.push(childText);
-      }if(spanElement.className.includes('plup')){conjugations.tense.plup.push(childText);
-      }if(spanElement.className.includes('futp')){conjugations.tense.futp.push(childText);
-      }if(spanElement.className.includes('sigm')){conjugations.tense.sigm.push(childText);
-      }if(spanElement.className.includes('aor')){conjugations.tense.aor.push(childText);
-      }if(spanElement.className.includes('act')){conjugations.voice.act.push(childText);
-      }if(spanElement.className.includes('pass')){conjugations.voice.pass.push(childText);
-      }if(spanElement.className.includes('ind')){conjugations.mood.ind.push(childText);
-      }if(spanElement.className.includes('sub')){conjugations.mood.sub.push(childText);
+      }if(spanElement.className.includes('pres')){ conjugations.tense.present.push(childText);
+      }if(spanElement.className.includes('impf')){conjugations.tense.imperfect.push(childText);
+      }if(spanElement.className.includes('fut')){conjugations.tense.future.push(childText);
+      }if(spanElement.className.includes('perf')){conjugations.tense.perfect.push(childText);
+      }if(spanElement.className.includes('plup')){conjugations.tense.pluperfect.push(childText);
+      }if(spanElement.className.includes('futp')){conjugations.tense.futurePerfect.push(childText);
+      }if(spanElement.className.includes('sigm')){conjugations.tense.sigmaticFuture.push(childText);
+      }if(spanElement.className.includes('aor')){conjugations.tense.aorist.push(childText);
+      }if(spanElement.className.includes('act')){conjugations.voice.active.push(childText);
+      }if(spanElement.className.includes('pass')){conjugations.voice.passive.push(childText);
+      }if(spanElement.className.includes('ind')){conjugations.mood.indicative.push(childText);
+      }if(spanElement.className.includes('sub')){conjugations.mood.subjunctive.push(childText);
       }if(spanElement.className.includes('imp-form-of')){conjugations.mood.imperative.push(childText);
-      }if(spanElement.className.includes('inf')){conjugations.form.inf.push(childText);
-      }if(spanElement.className.includes('part')){conjugations.form.part.push(childText);
-      }if(spanElement.className.includes('gen')){conjugations.case.gen.push(childText);
-      }if(spanElement.className.includes('ger')){conjugations.noun.ger.push(childText);
-      }if(spanElement.className.includes('dat')){conjugations.case.dat.push(childText);
-      }if(spanElement.className.includes('acc')){conjugations.case.acc.push(childText);
-      }if(spanElement.className.includes('sup')){conjugations.noun.sup.push(childText);
-      }if(spanElement.className.includes('abl')){conjugations.case.abl.push(childText);
+      }if(spanElement.className.includes('inf')){conjugations.form.infinitive.push(childText);
+      }if(spanElement.className.includes('part')){conjugations.form.participle.push(childText);
+      }if(spanElement.className.includes('gen')){conjugations.case.genitive.push(childText);
+      }if(spanElement.className.includes('ger')){conjugations.noun.gerundive.push(childText);
+      }if(spanElement.className.includes('dat')){conjugations.case.dative.push(childText);
+      }if(spanElement.className.includes('acc')){conjugations.case.accusative.push(childText);
+      }if(spanElement.className.includes('sup')){conjugations.noun.supine.push(childText);
+      }if(spanElement.className.includes('abl')){conjugations.case.ablative.push(childText);
       }
     });
     document.getElementById('submit').style.display = 'block'
@@ -123,7 +126,6 @@ function getLatinAttributes(doc,word){
     }
   else {
     const nounInflectionTable = doc.querySelector('table.inflection-table-la');
-    console.log(nounInflectionTable)
     if(nounInflectionTable){
       const conjugations = {}
       let declension = ""
@@ -135,9 +137,8 @@ function getLatinAttributes(doc,word){
           declension+=declensionElements[i].textContent
         }
         declension = declension.replaceAll("firstsecond","first&second").replaceAll("-"," ")
-        console.log(declension)
+        declension= declension.slice(0, declension.indexOf('declension')+10).trim();
         conjugations.group = declension
-        console.log(declension)
         document.getElementById('result').innerHTML +=  `<span style="font-size: 20px; display:"block";margin-left:5%>declension: ${declension}</span>`
       }
       let closestOl = null;
@@ -157,20 +158,21 @@ function getLatinAttributes(doc,word){
       firstListItem.querySelectorAll('dl,ul').forEach(el => el.remove());
       definition = firstListItem.textContent.trim();
       conjugations.number = {singular:[],plural:[]}
-      conjugations.case = {nom:[],gen:[],dat:[],acc:[],abl:[],voc:[]}
+      conjugations.case = {nominative:[],genitive:[],dative:[],accusative:[],ablative:[],vocative:[]}
       let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
       spanElements.forEach((spanElement) => {
         let childText = spanElement.firstElementChild.textContent;
         if(spanElement.className.includes('s-')){conjugations.number.singular.push(childText);
         }if(spanElement.className.includes('p-')){conjugations.number.plural.push(childText);
-        }if(spanElement.className.includes('nom')){conjugations.case.nom.push(childText);
-        }if(spanElement.className.includes('gen')){conjugations.case.gen.push(childText);
-        }if(spanElement.className.includes('dat')){conjugations.case.dat.push(childText);
-        }if(spanElement.className.includes('acc')){conjugations.case.acc.push(childText);
-        }if(spanElement.className.includes('abl')){conjugations.case.abl.push(childText);
-        }if(spanElement.className.includes('voc')){conjugations.case.voc.push(childText);
+        }if(spanElement.className.includes('nom')){conjugations.case.nominative.push(childText);
+        }if(spanElement.className.includes('gen')){conjugations.case.genitive.push(childText);
+        }if(spanElement.className.includes('dat')){conjugations.case.dative.push(childText);
+        }if(spanElement.className.includes('acc')){conjugations.case.accusative.push(childText);
+        }if(spanElement.className.includes('abl')){conjugations.case.ablative.push(childText);
+        }if(spanElement.className.includes('voc')){conjugations.case.vocative.push(childText);
         }
       });
+      baseDef = definition
       conjugations.type = 'latin';
       conjugations.pos = 'noun';
       document.getElementById('submit').style.display = 'block'
@@ -181,9 +183,45 @@ function getLatinAttributes(doc,word){
       vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
 
       console.log(vocab)
-    }else{ document.getElementById('result').style.display = 'block'
-    document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+    }else{ 
+      const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
+      if(latinElement){
+        const anchorTag = latinElement.querySelector('a');
+        if (anchorTag) {
+          const linkText = anchorTag.textContent; // Get the text content of the <a>
+          console.log("Anchor text:", linkText);
+          document.getElementById('resultForInfs').style.display = 'block'
+          const spanElement = latinElement.parentElement;
+          const spanElement1 = spanElement.parentElement;
+          const liElement = spanElement1.parentElement;
+          let definition = ""
+          if(liElement){
+            definition = liElement.textContent.trim()
+          }
+          definition+=","
+          document.getElementById('resultForInfs').innerHTML += definition
+        let noramlizedWord = word.normalize('NFD');
+        let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
+        let finalStr = noDiacritics.replace(/-/g, "");
+
+        if(finalStr.trim()!=linkText.trim())  {
+          fetch(`http://localhost:3000/fetch/${linkText}`)
+          .then(response => response.text())
+          .then(html => {
+            // Parse the returned HTML and extract the inflection table
+            const parser = new DOMParser();
+            const baseDoc = parser.parseFromString(html, 'text/html');
+            getLatinAttributes(baseDoc,linkText);
+          })
+        }
+       
+      }
+    }else{
+      //if()
+      document.getElementById('result').style.display = 'block'
+      document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
     }
+  }
   }
   // }catch(error){
   // //   document.getElementById('result').style.display = 'block'
@@ -224,13 +262,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const wrongDefButton = document.getElementById('wrongDef'); 
 
   if (submitButton) {
-
-    
     // Attach click event listener
     submitButton.addEventListener('click', function() {
-      console.log(document.getElementById("newDef").value)
-      if(document.getElementById("newDef").value && document.getElementById("newDef").value!="Enter correct definition"){
-        vocab.definition = document.getElementById('newDef').value
+      if(document.getElementById("newDef").style.display == "inline-block" && document.getElementById("newDef").value && document.getElementById("newDef").value!="Enter correct definition"){
+        if(!vocab.word){
+          vocab = {}
+          vocab.definition = document.getElementById('newDef').value
+          vocab.book = document.getElementById('bookSelector').value;
+          vocab.pronounciation = document.getElementById('pronounciation').value;
+          vocab.gender = document.getElementById('gender').value;
+          vocab.word = document.getElementById('wikiEntry').value;
+        }else{
+          vocab.definition = document.getElementById('newDef').value
+        }
       }
       chrome.storage.local.get('vocabList', function(data) {    
         let vocabList = data.vocabList || [];
@@ -240,7 +284,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
       });  
       alert("Pushed");
-      submitButton.style.display="none"
       document.getElementById('wrongDef').style.display = 'none'
       document.getElementById('newDef').style.display = 'none'
     });
@@ -249,6 +292,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
   wrongDefButton.addEventListener('click', function() {
     document.getElementById('newDef').style.display="inline-block"; 
+    document.getElementById('newDef').value=""; 
+    document.getElementById('submit').style.display="inline-block"; 
     console.log(vocab)
   });
 

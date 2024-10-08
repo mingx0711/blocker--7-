@@ -339,9 +339,21 @@ function showNextVocab(collection = currentCollectionSelection) {
       let bookDiv = document.getElementById('bookDiv');
       let pronounDiv = document.getElementById('pronounDiv');
       let genderDiv = document.getElementById('genderDiv');
-
-      const word = currentCollection[currentVocabIndex].word;
-      const definition = currentCollection[currentVocabIndex].definition;
+      let word;
+      let definition
+      if (Math.random()<=0.5){
+        const wordObject = currentCollection[currentVocabIndex];
+        if(wordObject.conjugations&&wordObject.conjugations.group!=""){
+          word = getRandomWordFromConjugations(wordObject.conjugations)
+          definition =wordObject.definition+"| \n"+makeStringReadable( Object.values(findSubfieldsForWord(word,wordObject.conjugations)).toString())+" for "+wordObject.word; 
+        }else{
+          word = wordObject.word
+          definition = currentCollection[currentVocabIndex].definition;
+        }
+      }else{
+       word = currentCollection[currentVocabIndex].word;
+       definition = currentCollection[currentVocabIndex].definition;
+      }
       const book = currentCollection[currentVocabIndex].book || '';
       if(currentCollection[currentVocabIndex].gender){
         const gender = currentCollection[currentVocabIndex].gender;
@@ -370,6 +382,15 @@ function showNextVocab(collection = currentCollectionSelection) {
       vocabFlashcard.style.display = 'block';
     }
   } 
+}
+window.addEventListener('resize', adjustFontSize);
+adjustFontSize();
+
+function adjustFontSize(){
+  const screenWidth = window.innerWidth;
+  let fontSize = screenWidth / 29;
+  document.getElementById('defDiv').style.fontSize = fontSize + 'px';
+
 }
 
 function snoozeCurrentVocab() {
@@ -721,32 +742,7 @@ function getRandomWordFromConjugations(conjugations,commonWordsList=[]) {
       return randomWord;}
 }
 function makeStringReadable(names){
-  names = names.replace(/pres/g, 'present');
-  names = names.replace(/ind/g, 'indicative');
-  names = names.replace(/pass/g, 'passive');
-  names = names.replace(/futp/g, 'future perfect');
-  names = names.replace("fut/", 'future/');
-  names = names.replace("fut,", 'future');
-  names = names.replace(/fut/g, 'future');
-
-  names = names.replace(",perf,", ',perfect,');
-  names = names.replace(",impf,", ',imperfect,');
-  names = names.replace("plup", ',pluperfect,');
-  names = names.replace(/sigm/g, 'sigmatic future');
-  names = names.replace(/aor/g, 'aoristic future');
-  names = names.replace(/act/g, 'active');
-  names = names.replace(/sub/g, 'subjunctive');
-  names = names.replace(/inf/g, 'infinitive');
-  names = names.replace(/part/g, 'participle');
-  names = names.replace(/ger/g, 'gerundive');
-  names = names.replace(/sup/g, 'supine');
-  names = names.replace(/gen/g, 'genitive');
-  names = names.replace(/abl/g, 'ablative');
-  names = names.replace(/acc/g, 'accusative');
-  names = names.replace(/dat/g, 'dative');
-  names = names.replace(/nom/g, 'nominative');
-  names = names.replace(/voc/g, 'vocative');
-
+  names = names.replace("futurePerfect", 'future perfect');
   return names
 }
 function findSubfieldsForWord(word, conjugations) {

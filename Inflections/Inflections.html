@@ -23,7 +23,7 @@
 <h2>Import vocabs and its conjugations</h2>
 <div>
   <div class="ui input" style="margin: auto;display: flex;margin-top:15%;justify-content: center;"> 
-    <input type="text" style = "font-size: 20px;"id="wikiEntry" placeholder="Enter a word by its original form">
+    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "gestarum"placeholder="Enter a word by its original form">
   </div>
   <div id="languageSelection" style="margin: auto;display: inline-block;justify-content: center;"></div>
 <h3>   Only supports auto import for Latin</h3>
@@ -51,10 +51,11 @@
 </select>
 <button class = "ui button"id="lookupButton">Lookup</button>
 <button class = "ui button"id="submit" style = "display:none;margin-left: 5%;">Add to database</button>
-<button class = "ui button"id="wrongDef" style = "display:none;margin-left: 5%;">definition is wrong</button>
+<button class = "ui button"id="wrongDef" style = "display:none;margin-left: 5%;">definition is wrong?</button>
 <input type="text" class = "ui input" id="newDef" style = "display:none;margin-left: 5%;font-size: 15px;" placeholder="Enter correct definition">
 
 </div>
+<div id="resultForInfs" style = "margin: 5%;"></div>
 <div id="result" style = "margin: 5%;"></div>
 </div>
 <div id="floatingWindow">The vocabulary is not valid, please check your spelling.</div>

@@ -198,9 +198,41 @@ function getLatinAttributes(doc,word){
       conjugations.type = 'latin';
       document.getElementById("addAuto").style.display = 'block'
 
-     }else{
-    document.getElementById('message').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
-    }
+     }const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
+     if(latinElement){
+       const anchorTag = latinElement.querySelector('a');
+       if (anchorTag) {
+         const linkText = anchorTag.textContent; // Get the text content of the <a>
+         console.log("Anchor text:", linkText);
+         const spanElement = latinElement.parentElement;
+         const spanElement1 = spanElement.parentElement;
+         const liElement = spanElement1.parentElement;
+         let definition = ""
+         if(liElement){
+           definition = liElement.textContent.trim()
+         }
+         definition+=","
+       let noramlizedWord = word.normalize('NFD');
+       let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
+       let finalStr = noDiacritics.replace(/-/g, "");
+
+       if(finalStr.trim()!=linkText.trim())  {
+         fetch(`http://localhost:3000/fetch/${linkText}`)
+         .then(response => response.text())
+         .then(html => {
+           // Parse the returned HTML and extract the inflection table
+           const parser = new DOMParser();
+           const baseDoc = parser.parseFromString(html, 'text/html');
+           getLatinAttributes(baseDoc,linkText);
+         })
+       }
+      
+     }
+   }else{
+     //if()
+     document.getElementById('result').style.display = 'block'
+     document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+   }
   }
 }
 document.getElementById('manageButton').addEventListener('click', function() {

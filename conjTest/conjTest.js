@@ -1,3 +1,5 @@
+import {makeStringReadable} from '../test1/test1.js'
+
 let currentVocabIndex = null;
 let vocabList = [];
 let currentQuizWord = null;
@@ -284,31 +286,10 @@ function getRandomKeysFromArray(array, count) {
     
     return combinedSubfields;
   }
-function makeStringReadable(names){
-  names = names.replace(/pres/g, 'present');
-  names = names.replace(/ind/g, 'indicative');
-  names = names.replace(/pass/g, 'passive');
-  names = names.replace(/fut/g, 'future');
-  names = names.replace(",perf,", ',perfect,');
-  names = names.replace(",impf,", ',imperfect,');
-  names = names.replace(",plup,", ',pluperfect,');
-  names = names.replace(/futp/g, 'future perfect');
-  names = names.replace(/sigm/g, 'sigmatic future');
-  names = names.replace(/aor/g, 'aoristic future');
-  names = names.replace(/act/g, 'active');
-  names = names.replace(/sub/g, 'subjunctive');
-  names = names.replace(/inf/g, 'infinitive');
-  names = names.replace(/part/g, 'participle');
-  names = names.replace(/ger/g, 'gerundive');
-  names = names.replace(/sup/g, 'supine');
-  names = names.replace(/gen/g, 'genitive');
-  names = names.replace(/abl/g, 'ablative');
-  names = names.replace(/acc/g, 'accusative');
-  names = names.replace(/dat/g, 'dative');
-  names = names.replace("nom",'nominative');
-  names = names.replace(/voc/g, 'vocative');
-  return names
-}
+  function makeStringReadable(names){
+    names = names.replace("futurePerfect", 'future perfect');
+    return names
+  }
 function quizStyle6(){
   console.log("quizStyle6")
   wordToTest = ""
