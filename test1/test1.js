@@ -462,9 +462,8 @@ function quizStyle1() {
     names = names.replace("fut/", 'future/');
     names = names.replace("fut,", 'future');
     names = names.replace(/fut/g, 'future');
-
-    names = names.replace(",perf,", ',perfect,');
-    names = names.replace(",impf,", ',imperfect,');
+    names = names.replace("perf,", 'perfect,');
+    names = names.replace("impf", 'imperfect');
     names = names.replace("plup", ',pluperfect,');
     names = names.replace(/sigm/g, 'sigmatic future');
     names = names.replace(/aor/g, 'aoristic future');

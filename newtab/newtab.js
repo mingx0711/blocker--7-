@@ -105,8 +105,8 @@ function showNextItem(checkBooks = ["all"]) {
   }else{
     const eligibleForQuiz = vocabList.length>=4 && vocabList.some(entry => entry.seen > 3);
     const probs =  (vocabList.filter(entry => entry.seen > 3).length) / (vocabList.length);
-    const shouldShowQuiz = true
-    //const shouldShowQuiz = (Math.random() < Math.min(probs, 0.3)) && eligibleForQuiz;
+    //const shouldShowQuiz = true
+    const shouldShowQuiz = (Math.random() < Math.min(probs, 0.3)) && eligibleForQuiz;
   
     if (shouldShowQuiz) {
       showQuiz();

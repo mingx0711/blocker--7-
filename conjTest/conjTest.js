@@ -136,7 +136,7 @@ function showNextItem() {
     document.getElementById('nextButton').style.display = 'none';
     document.getElementById('quizContainer').style.display = 'none';
     document.getElementById('trueFalseContainer').style.display = 'none';
-    const quizStyle = Math.floor(Math.random() * 2);
+    const quizStyle = getRandomNumber(0,1)
     console.log(quizStyle);
     switch(quizStyle){
       case 0:
@@ -305,11 +305,13 @@ function makeStringReadable(names){
   names = names.replace(/abl/g, 'ablative');
   names = names.replace(/acc/g, 'accusative');
   names = names.replace(/dat/g, 'dative');
-  names = names.replace("nom,",'nominative');
+  names = names.replace("nom",'nominative');
   names = names.replace(/voc/g, 'vocative');
   return names
 }
 function quizStyle6(){
+  console.log("quizStyle6")
+  wordToTest = ""
     const eligibleVocab = filteredVocabList.filter(entry => entry.conjugations&& entry.conjugations.type!="");
   if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
     currentVocabIndex = 0;
@@ -352,6 +354,7 @@ function quizStyle6(){
     }
     quizType="groupTest"
   }else{
+    quizType="conjTest1"
     if(conjugations.pos=="verb"){
       const typeOfVerbToTest = getRandomNumber(1,10)
       numberOfFields = getRandomNumber(1, 5);
@@ -397,7 +400,6 @@ function quizStyle6(){
       console.log(wrongAnswers)
       currentQuizWord = correctVocab.word;
       currentQuizDefinition = correctAnswer;
-      quizType = 'conjugation';
       options = [correctAnswer];
       console.log(options);
       for (let i = 0; i<3;i++) {
@@ -407,6 +409,7 @@ function quizStyle6(){
           i--;
           }
       }
+      wordToTest = commonWord
       correctConj=correctAnswer;
       shuffleArray(options);
       let names = conjToTest.toString();
@@ -432,6 +435,7 @@ function quizStyle6(){
     document.getElementById('nextAfterIncorrectButton').style.display = 'none';
 }
 function quizStyle7(){
+  quizType="conjTest2"
   wordToTest=""
   const eligibleVocab = filteredVocabList.filter(entry => entry.conjugations&& entry.conjugations.type!="");
   if (currentVocabIndex === null || currentVocabIndex >= filteredVocabList.length - 1) {
@@ -463,7 +467,6 @@ function quizStyle7(){
     }
   currentQuizWord = correctVocab.word;
   currentQuizDefinition = correctAnswer;
-  quizType = 'conjugation';
   options = [correctAnswer];
   console.log(options);
   for (let i = 0; i<3;i++) {
@@ -544,24 +547,20 @@ function quizStyle7(){
         vocabFlashcard.textContent+= "\n"
         vocabFlashcard.textContent+= " group: "
         vocabFlashcard.textContent+= correctVocab.conjugations.group
-      } if(conjToTest.length>0&&wordToTest.length==0){
+      } if(conjToTest.length>0&&quizType=="conjTest1"){
         vocabFlashcard.textContent+= "\n"
         vocabFlashcard.textContent+= correctConj
         vocabFlashcard.textContent+= " is one of the "
-        vocabFlashcard.textContent+= conjToTest.toString()
+        vocabFlashcard.textContent+= makeStringReadable(conjToTest.toString())
         vocabFlashcard.textContent+= "form of "
         vocabFlashcard.textContent+= correctVocab.word
-      }if(conjToTest.length>0&&wordToTest.length>0){
+      }if(conjToTest.length>0&&quizType=="conjTest2"){
         vocabFlashcard.textContent+= "\n"
         vocabFlashcard.textContent+= wordToTest
         vocabFlashcard.textContent+= " is one of the "
-        vocabFlashcard.textContent+= conjToTest.toString()
+        vocabFlashcard.textContent+= makeStringReadable(conjToTest.toString())
         vocabFlashcard.textContent+= " form of "
         vocabFlashcard.textContent+= correctVocab.word
-      }if(quizType=="groupTest"){
-        vocabFlashcard.textContent+= "\n"
-        vocabFlashcard.textContent+= " group: "
-        vocabFlashcard.textContent+= correctVocab.conjugations.group
       }
       document.getElementById('quizContainer').style.display = 'none';
       vocabFlashcard.style.display = 'block';
