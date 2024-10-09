@@ -56,6 +56,7 @@ function getLatinAttributes(doc,word){
   const pronounciation = document.getElementById('pronounciation').value;
   const gender = document.getElementById('gender').value;
   let conjugations = {};
+  document.getElementById('vocabInfo').innerHTML=""
   vocab = {}
   let verbInflectionTable;
   let iTableLocator = doc.querySelector('.inflection-table.vsSwitcher tbody tr th i[lang="la"]');
@@ -197,42 +198,48 @@ function getLatinAttributes(doc,word){
 
       conjugations.type = 'latin';
       document.getElementById("addAuto").style.display = 'block'
-
-     }const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
-     if(latinElement){
-       const anchorTag = latinElement.querySelector('a');
-       if (anchorTag) {
-         const linkText = anchorTag.textContent; // Get the text content of the <a>
-         console.log("Anchor text:", linkText);
-         const spanElement = latinElement.parentElement;
-         const spanElement1 = spanElement.parentElement;
-         const liElement = spanElement1.parentElement;
-         let definition = ""
-         if(liElement){
-           definition = liElement.textContent.trim()
-         }
-         definition+=","
-       let noramlizedWord = word.normalize('NFD');
-       let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
-       let finalStr = noDiacritics.replace(/-/g, "");
-
-       if(finalStr.trim()!=linkText.trim())  {
-         fetch(`http://localhost:3000/fetch/${linkText}`)
-         .then(response => response.text())
-         .then(html => {
-           // Parse the returned HTML and extract the inflection table
-           const parser = new DOMParser();
-           const baseDoc = parser.parseFromString(html, 'text/html');
-           getLatinAttributes(baseDoc,linkText);
-         })
-       }
-      
+      console.log(vocab)
+     }else{
+      const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
+      if(latinElement){
+        const anchorTag = latinElement.querySelector('a');
+        if (anchorTag) {
+          const linkText = anchorTag.textContent; // Get the text content of the <a>
+          console.log("Anchor text:", linkText);
+          const spanElement = latinElement.parentElement;
+          const spanElement1 = spanElement.parentElement;
+          const liElement = spanElement1.parentElement;
+          let definition = ""
+          if(liElement){
+            definition = liElement.textContent.trim()
+          }
+          definition+=","
+        let noramlizedWord = word.normalize('NFD');
+        let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
+        let finalStr = noDiacritics.replace(/-/g, "");
+ 
+        if(finalStr.trim()!=linkText.trim())  {
+          fetch(`http://localhost:3000/fetch/${linkText}`)
+          .then(response => response.text())
+          .then(html => {
+            // Parse the returned HTML and extract the inflection table
+            const parser = new DOMParser();
+            const baseDoc = parser.parseFromString(html, 'text/html');
+            console.log(linkText)
+            getLatinAttributes(baseDoc,linkText);
+          })
+        }else{
+          document.getElementById('vocabInfo').style.display = 'block'
+      document.getElementById('vocabInfo').innerHTML = 'invalid word(either is one of the special words, does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+        }
+      }
+    }else{
+      //if()
+      document.getElementById('vocabInfo').style.display = 'block'
+      document.getElementById('vocabInfo').innerHTML = 'invalid word(either is one of the special words, does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+    }
      }
-   }else{
-     //if()
-     document.getElementById('result').style.display = 'block'
-     document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
-   }
+    
   }
 }
 document.getElementById('manageButton').addEventListener('click', function() {
@@ -268,8 +275,14 @@ function populateBookSelector() {
   });
 }
 document.addEventListener('DOMContentLoaded', (event) => {
+  chrome.storage.sync.get({ hideTips}, (result) => {
+    console.log(hideTips)
+    if (!hideTips){
+      document.getElementById('tipsBox').style.display='block';
+    }
+  });
 
-
+  
   const bookSelector = document.getElementById('bookSelector');
   const newBookField = document.getElementById('newBookField');
   const addBookButton = document.getElementById('addBookButton');
@@ -336,3 +349,8 @@ document.getElementById('addAuto').addEventListener('click', function(e) {
     });
   });
 });
+document.getElementById('hideTips').addEventListener('click', function(e) {
+  document.getElementById('tipsBox').style.display='none';
+  hideTips = true
+  chrome.storage.sync.set({ hideTips: true }, function(data) {})
+})

@@ -483,10 +483,15 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("click")
     chrome.storage.local.get('vocabList', function(data) {
       const groupedData = data.vocabList.reduce((acc, item) => {
+        let pronoun = ""
+        let itemGender = ""
         if (!acc[item.book]) {
             acc[item.book] = [];
         }
-        acc[item.book].push(`${item.word}: ${item.definition}|`);
+        if(item.pronounciation){
+
+        }
+        acc[item.book].push(`${item.word}:${item.definition}:${itemGender}:${pronoun}|`);
         return acc;
     }, {});
 

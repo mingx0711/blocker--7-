@@ -1,4 +1,3 @@
-import {makeStringReadable} from '../test1/test1.js'
 
 let currentVocabIndex = null;
 let vocabList = [];
@@ -311,29 +310,32 @@ function quizStyle6(){
   console.log(correctVocab.word)
   if((getRandomNumber(1,9))>=8){
     questionText = "what is the group of " + correctVocab.word
-    correctAnswer =  conjugations.group;
-    console.log(correctAnswer)
-    options = [correctAnswer];
-    currentQuizWord = correctVocab.word;
-    if(Array.isArray(correctAnswer)){
-      correctAnswer = correctAnswer[0]
-    }
-    let wrongAnswers = []
-    if(conjugations.pos=="verb"){
-      wrongAnswers = ["first conjugation","second conjugation","third conjugation","fourth conjugation","irregular","first&second conjugation"]
-    }else{
-      wrongAnswers = ["first declension","second declension","third declension","fourth declension","fifth declension","irregular"]
-    }
-    for (let i = 0; i<3;i++) {
-      console.log(options)
-        const index = getRandomNumber(1,wrongAnswers.length)
-        if (!options.includes(wrongAnswers[index])) {
-          options.push(wrongAnswers[index]);
-        }else{
-          i--
-        }
-    }
+    if( conjugations.group &&  conjugations.group!=""){
+      correctAnswer =  conjugations.group;
+      console.log(correctAnswer)
+      options = [correctAnswer];
+      currentQuizWord = correctVocab.word;
+      if(Array.isArray(correctAnswer)){
+        correctAnswer = correctAnswer[0]
+      }
+      let wrongAnswers = []
+      if(conjugations.pos=="verb"){
+        wrongAnswers = ["first conjugation","second conjugation","third conjugation","fourth conjugation","irregular","first&second conjugation"]
+      }else{
+        wrongAnswers = ["first declension","second declension","third declension","fourth declension","fifth declension","irregular"]
+      }
+      for (let i = 0; i<3;i++) {
+        console.log(options)
+          const index = getRandomNumber(1,wrongAnswers.length)
+          if (!options.includes(wrongAnswers[index])) {
+            options.push(wrongAnswers[index]);
+          }else{
+            i--
+          }
+      }
     quizType="groupTest"
+
+    }
   }else{
     quizType="conjTest1"
     if(conjugations.pos=="verb"){
@@ -509,40 +511,40 @@ function quizStyle7(){
     const correctVocab = vocabList.find(entry => entry.word === currentQuizWord);
     console.log(correctVocab)
     if (correctVocab) {
-
+      vocabFlashcard.innerHTML+= String.fromCodePoint(0x1F4A0);
       vocabFlashcard.textContent = `${correctVocab.word}: ${correctVocab.definition}`;
-      vocabFlashcard.textContent+= "\n"
       if(correctVocab.gender && correctVocab.gender!=""){
-        vocabFlashcard.textContent+= "\n"
-        vocabFlashcard.textContent+= " gender:"
+        vocabFlashcard.textContent+= String.fromCodePoint(0x1F4A0);
+        vocabFlashcard.textContent+= "gender:"
         vocabFlashcard.textContent+= correctVocab.gender
       }
       if(correctVocab.pronounciation && correctVocab.pronounciation!=""){
-        vocabFlashcard.textContent+= "\n"
-        vocabFlashcard.textContent+= " pronounciation:"
+        vocabFlashcard.textContent+= String.fromCodePoint(0x1F4A0);
+        vocabFlashcard.textContent+= "pronounciation:"
         vocabFlashcard.textContent+= correctVocab.pronounciation
       }
       
       if(correctVocab.conjugations.group){
         console.log()
-        vocabFlashcard.textContent+= "\n"
-        vocabFlashcard.textContent+= " group: "
+        vocabFlashcard.innerHTML+=String.fromCodePoint(0x1F4A0);
+        vocabFlashcard.textContent+= "group: "
         vocabFlashcard.textContent+= correctVocab.conjugations.group
       } if(conjToTest.length>0&&quizType=="conjTest1"){
-        vocabFlashcard.textContent+= "\n"
+        vocabFlashcard.innerHTML+= String.fromCodePoint(0x1F4A0);
         vocabFlashcard.textContent+= correctConj
         vocabFlashcard.textContent+= " is one of the "
         vocabFlashcard.textContent+= makeStringReadable(conjToTest.toString())
         vocabFlashcard.textContent+= "form of "
         vocabFlashcard.textContent+= correctVocab.word
       }if(conjToTest.length>0&&quizType=="conjTest2"){
-        vocabFlashcard.textContent+= "\n"
+        vocabFlashcard.innerHTML+= String.fromCodePoint(0x1F4A0);
         vocabFlashcard.textContent+= wordToTest
         vocabFlashcard.textContent+= " is one of the "
         vocabFlashcard.textContent+= makeStringReadable(conjToTest.toString())
         vocabFlashcard.textContent+= " form of "
         vocabFlashcard.textContent+= correctVocab.word
       }
+      vocabFlashcard.innerHTML+= String.fromCodePoint(0x1F4A0);
       document.getElementById('quizContainer').style.display = 'none';
       vocabFlashcard.style.display = 'block';
     }

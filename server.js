@@ -39,7 +39,7 @@ app.post('/addVocab', (req, res) => {
   res.json({ csvData });
 });
 app.get('/fetch/:word', async (req, res) => {
-  const word = req.params.word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ā', 'a');
+  const word = req.params.word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ū', 'u');
   try {
       const fetch = await import('node-fetch'); // Dynamically import node-fetch
       const response = await fetch.default(`https://en.wiktionary.org/wiki/${word}`);
