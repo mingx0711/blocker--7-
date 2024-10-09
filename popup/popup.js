@@ -1,5 +1,6 @@
 let vocab = {}
 let def;
+
 document.getElementById('addVocabForm').addEventListener('submit', function(e) {
   e.preventDefault();
   
@@ -275,12 +276,34 @@ function populateBookSelector() {
   });
 }
 document.addEventListener('DOMContentLoaded', (event) => {
-  chrome.storage.sync.get({ hideTips}, (result) => {
-    console.log(hideTips)
-    if (!hideTips){
+  
+  chrome.storage.sync.get('hideBox',function(data){
+    if (!data.hideBox||typeof(data.hideBox)===undefined||data.hideBox == null){
       document.getElementById('tipsBox').style.display='block';
-    }
+    }else{
+      document.getElementById('tipsBox').style.display='none';
+    }      
+    console.log(data.hideBox)
+
   });
+  chrome.storage.sync.get('hideBox0',function(data){
+    if (!data.hideBox0||typeof(data.hideBox0)===undefined||data.hideBox0 == null){
+      document.getElementById('tipsBox0').style.display='block';
+    }else{
+      document.getElementById('tipsBox0').style.display='none';
+    } 
+    console.log(data.hideBox0)
+
+  });
+  document.getElementById('hideTips').addEventListener('click', function(e) {
+    document.getElementById('tipsBox').style.display='none';
+    chrome.storage.sync.set({ hideBox: true }, function(data) {})
+  })
+  document.getElementById('hideTips0').addEventListener('click', function(e) {
+    document.getElementById('tipsBox0').style.display='none';
+    chrome.storage.sync.set({ hideBox0: true }, function(data) {})
+  })
+
 
   
   const bookSelector = document.getElementById('bookSelector');
@@ -349,8 +372,3 @@ document.getElementById('addAuto').addEventListener('click', function(e) {
     });
   });
 });
-document.getElementById('hideTips').addEventListener('click', function(e) {
-  document.getElementById('tipsBox').style.display='none';
-  hideTips = true
-  chrome.storage.sync.set({ hideTips: true }, function(data) {})
-})
