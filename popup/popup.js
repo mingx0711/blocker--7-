@@ -40,7 +40,7 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
     });
   }else{
     word = word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ā', 'a')
-    fetch(`http://localhost:3000/fetch/${word}`)
+    fetch(`https://en.wiktionary.org/wiki/${word}`)
     .then(response => response.text())
     .then(html => {
       // Parse the returned HTML and extract the inflection table
@@ -220,7 +220,7 @@ function getLatinAttributes(doc,word){
         let finalStr = noDiacritics.replace(/-/g, "");
  
         if(finalStr.trim()!=linkText.trim())  {
-          fetch(`http://localhost:3000/fetch/${linkText}`)
+          fetch(`https://en.wiktionary.org/wiki/${linkText}`)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
