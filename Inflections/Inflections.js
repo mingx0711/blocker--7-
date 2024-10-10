@@ -13,9 +13,8 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
   document.getElementById('lookupButton').addEventListener('click', function() {
       document.getElementById('result').innerHTML = ""
   document.getElementById('resultForInfs').innerHTML = ""
-    const wordRaw = document.getElementById('wikiEntry').value;
+    const word = document.getElementById('wikiEntry').value;
     const language = document.getElementById('selectLanguage').value;
-    const word = wordRaw.replaceAll('ō', 'o').replaceAll('ā', 'a')
     document.getElementById('wrongDef').style.display="block";
     console.log(word,language)
     if (word && language) {
@@ -381,12 +380,6 @@ function formatLanguage(str){
 }
 function getGermanAttributes(doc,word){
   getEasyAttributes(doc,word,"de")
-
-  // if(){
-
-  // }else{
-  //   getEasyAttributes(doc,word,"de")
-
   }
 
 document.addEventListener('DOMContentLoaded', (event) => {
