@@ -137,7 +137,7 @@ function getLatinAttributes(doc,word){
           declension+=declensionElements[i].textContent
         }
         declension = declension.replaceAll("firstsecond","first&second").replaceAll("-"," ")
-        declension= declension.slice(0, declension.indexOf('declension')+10).trim();
+        declension= declension.slice(0, declension.indexOf(' ')).trim();
         conjugations.group = declension
         document.getElementById('result').innerHTML +=  `<span style="font-size: 20px; display:"block";margin-left:5%>declension: ${declension}</span>`
       }
@@ -184,6 +184,7 @@ function getLatinAttributes(doc,word){
 
       console.log(vocab)
     }else{ 
+      //case when its a inflection of some other word
       const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
       if(latinElement){
         const anchorTag = latinElement.querySelector('a');
@@ -216,11 +217,31 @@ function getLatinAttributes(doc,word){
         }
        
       }
-    }else{
-      //if()
-      document.getElementById('result').style.display = 'block'
-      document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
-    }
+      }else{
+        // is adv/non camparable word
+        const isLatinWord = doc.querySelector('strong.Latn.headword[lang="la"]');
+        if(isLatinWord){
+          const grannyElement = isLatinWord.parentElement.parentElement;
+          const closestOl = grannyElement.nextElementSibling;
+          const liElement = closestOl.querySelector("li"); // Get the text content of the <a>
+          document.getElementById('result').style.display = 'block'
+          let definition = ""
+          if(liElement){
+            liElement.querySelectorAll('dl,ul').forEach(el => el.remove());
+            definition = liElement.textContent.trim()
+          }
+          document.getElementById('result').innerHTML += definition
+          vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+          console.log(vocab)
+          
+          document.getElementById('submit').style.display = 'block'
+          document.getElementById('wrongDef').style.display = 'block'
+        }else{
+          document.getElementById('result').style.display = 'block'
+          document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+        }
+        
+      }
   }
   }
   // }catch(error){

@@ -235,12 +235,31 @@ function getLatinAttributes(doc,word){
         }
       }
     }else{
-      //if()
-      document.getElementById('vocabInfo').style.display = 'block'
-      document.getElementById('vocabInfo').innerHTML = 'invalid word(either is one of the special words, does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+      
+        // is adv/non camparable word
+        const isLatinWord = doc.querySelector('strong.Latn.headword[lang="la"]');
+        if(isLatinWord){
+          const grannyElement = isLatinWord.parentElement.parentElement;
+          const closestOl = grannyElement.nextElementSibling;
+          console.log(closestOl)
+          const liElement = closestOl.querySelector("li"); // Get the text content of the <a>
+          document.getElementById('vocabInfo').style.display = 'block'
+          let definition = ""
+          if(liElement){
+            liElement.querySelectorAll('dl,ul').forEach(el => el.remove());
+            definition = liElement.textContent.trim()
+          }
+          document.getElementById('vocabInfo').innerHTML += definition
+          vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+          console.log(vocab)
+          document.getElementById("addAuto").style.display = 'block'
+
+        }else{
+          document.getElementById('vocabInfo').style.display = 'block'
+          document.getElementById('vocabInfo').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+        }
+      }
     }
-     }
-    
   }
 }
 document.getElementById('manageButton').addEventListener('click', function() {
