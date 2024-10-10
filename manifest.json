@@ -3,13 +3,14 @@
   "name": "Flashcard & Quiz for new tab Extension",
   "version": "1.1.3.6",
   "description": "Displays a flashcard with a random word-definition or test every time a new page is opened.",
-  "permissions": ["storage"],
+  "permissions": ["storage","https://latin-extention-3guodg623-mingx0711s-projects.vercel.app/*"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
       "128": "icon128.png"
     }
   },
+  "host_permissions": ["https://latin-extention-3guodg623-mingx0711s-projects.vercel.app/*"],
   "content_security_policy": {
     "script-src": "'self'",
     "object-src": "'self'"
@@ -18,7 +19,7 @@
     "newtab": "newtab/newtab.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "server.js"
   }
   
 }

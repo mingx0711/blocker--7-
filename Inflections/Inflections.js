@@ -14,8 +14,8 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
     console.log(word,language)
     if (word && language) {
         // Call the backend server instead of Wiktionary directly
-        fetch(`http://localhost:3000/fetch/${word}`)
-          .then(response => response.text())
+        fetch(`cors-anywhere.herokuapp.com/https://latin-extention-foy1cj71x-mingx0711s-projects.vercel.app/fetch/${word}`)
+        .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
             const parser = new DOMParser();
@@ -115,10 +115,9 @@ function getLatinAttributes(doc,word){
       }
     });
     document.getElementById('submit').style.display = 'block'
-    document.getElementById('result').innerHTML += "<br />";
     document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;">group:${conjugationText},</span>`
-    document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;">definition${definition}</span>`
-    document.getElementById('result').innerHTML += "<br />";
+    document.getElementById('result').innerHTML +=String.fromCodePoint(0x1F4A0);
+    document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;">definition:${definition}</span>`
     document.getElementById('result').innerHTML += verbInflectionTable.outerHTML;
     conjugations.type = 'latin';
     vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
@@ -177,8 +176,8 @@ function getLatinAttributes(doc,word){
       conjugations.pos = 'noun';
       document.getElementById('submit').style.display = 'block'
       document.getElementById('wrongDef').style.display = 'block'
-
-      document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;display:"block";margin-left:5%>,definition:${definition}</span>`
+      document.getElementById('result').innerHTML +=String.fromCodePoint(0x1F4A0);
+      document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;display:"block";margin-left:5%>,definition: ${definition}</span>`
       document.getElementById('result').innerHTML += nounInflectionTable.outerHTML;
       vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
 
@@ -205,7 +204,7 @@ function getLatinAttributes(doc,word){
         let finalStr = noDiacritics.replace(/-/g, "");
 
         if(finalStr.trim()!=linkText.trim())  {
-          fetch(`http://localhost:3000/fetch/${linkText}`)
+          fetch(`https://latin-extention-foy1cj71x-mingx0711s-projects.vercel.app/fetch/${linkText}`)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
