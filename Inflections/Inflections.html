@@ -23,17 +23,20 @@
 <h2>Import vocabs and its conjugations</h2>
 <div>
   <div class="ui input" style="margin: auto;display: flex;margin-top:15%;justify-content: center;"> 
-    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "vix"placeholder="Enter a word by its original form">
+    <input type="text" style = "font-size: 20px;"id="wikiEntry" value = "prendo"placeholder="Enter a word by its original form">
   </div>
   <div id="languageSelection" style="margin: auto;display: inline-block;justify-content: center;"></div>
-<h3>   Only supports auto import for Latin</h3>
-<h3>   For latin: enter a word by its base form for example moneo,levandus</h3>
+<h3>  Select the language you want to query then enter the word</h3>
 <h3>  If a word has multiple parts of speech the data collection MIGHT be wrong</h3>
 <h3>  In this case click definition is wrong, enter new definition then click add to database</h3>
 
 <select class = "ui search dropdown" type="text" style="margin: auto;display: inline-block;justify-content: center;margin-left: 5%;"class = "ui dropdown" id="selectLanguage" >  
 <option value="latin">Latin</option>
 <option value="german">German</option>
+<option value="it">Italian</option>
+<option value="fr">French</option>
+<option value="nl">Dutch</option>
+
 </select>
 <div style="margin: auto;display: inline-block;justify-content: center;"class="ui input"> 
   <select class = "ui search dropdown" type="text" id="gender" >
