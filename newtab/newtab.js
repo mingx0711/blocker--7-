@@ -578,6 +578,8 @@ document.getElementById('trueFalseQuestion').textContent = `Is the definition of
 document.getElementById('trueFalseContainer').style.display = 'block';
 document.getElementById('quizContainer').style.display = 'none';
 document.getElementById('vocabFlashcard').style.display = 'none';
+document.getElementById('snoozeButton').style.display = ''
+document.getElementById('snoozeButton').style.display = ''
 document.getElementById('correctMessage').style.display = 'none';
 document.getElementById('incorrectMessage').style.display = 'none';
 document.getElementById('correctDefinition').style.display = 'none';
@@ -1010,6 +1012,10 @@ function checkAnswer(button) {
 }
 
 function showCorrectAnswer() {
+  const quizContainer = document.querySelector('.quiz-container');
+  quizContainer.style.display = "none";
+  const tfContainer = document.querySelector('.true-false-container');
+  tfContainer.style.display = "none";
   const vocabFlashcard = document.getElementById('correctDefinition');
   vocabFlashcard.style.display = 'block';
   const correctVocab = vocabList.find(entry => entry.word === currentQuizWord);
