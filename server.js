@@ -1,6 +1,4 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const fs = require('fs');
+
 const cors = require('cors'); // Import cors
 const app = express();
 const PORT = 3000;
@@ -24,6 +22,28 @@ app.get('/fetch/:word', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === "fetchWordData") {
+      const word = request.word;
+      const apiUrl = `https://en.wiktionary.org/api/rest_v1/page/html/${word}?redirect=true&stash=true`;
 
+      fetch(apiUrl)
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error("Network response was not ok");
+              }
+              return response.text();  // Wiktionary API returns HTML
+          })
+          .then(data => {
+              sendResponse({ success: true, data: data });
+          })
+          .catch(error => {
+              sendResponse({ success: false, error: error.message });
+          });
+
+      // Required to return true to indicate that the response is sent asynchronously
+      return true;
+  }
+});
 
 

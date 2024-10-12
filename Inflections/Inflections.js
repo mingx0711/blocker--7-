@@ -18,24 +18,25 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
     document.getElementById('wrongDef').style.display="block";
     console.log(word,language)
     if (word && language) {
-        // Call the backend server instead of Wiktionary directly
-        fetch(`http://localhost:3000/fetch/${word}`)
-          .then(response => response.text())
-          .then(html => {
-            // Parse the returned HTML and extract the inflection table
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
+      chrome.runtime.sendMessage({ action: "fetchWordData", word: word }, function(response) {
+        if (response.success) {
+            console.log("Word data: ", response.data);
             if (language == "latin"){
-              getLatinAttributes(doc,word);
+              getLatinAttributes(response.data,word);
             } else if(language == 'german'){
-              getGermanAttributes(doc,word);
+              getGermanAttributes(response.data,word);
             } else{
-              getLinkedAttributes(doc,word,language)
+              getLinkedAttributes(response.data,word,language)
             }
-          })
-      } else {
-        alert('Please enter a word and select a language.');
-      }});
+        } else {
+            console.error("Error fetching word data: ", response.error);
+        }
+        
+        });
+            // Parse the returned HTML and extract the inflection table
+    
+    }
+    });
     
 function getLatinAttributes(doc,word){
   //try{

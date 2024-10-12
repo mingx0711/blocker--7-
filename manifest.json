@@ -18,7 +18,7 @@
     "newtab": "newtab/newtab.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "server.js"
   }
   
 }
