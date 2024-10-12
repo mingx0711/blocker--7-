@@ -1,15 +1,20 @@
 let vocab = {}
-let baseDef = {}
 document.getElementById('selectLanguage').addEventListener('change', function() {
     let selectedLanguage = this.value;  // Get the selected value
     let word = document.getElementById("wikiEntry").value;
-    getConjugation(word,selectedLanguage);
+    const selectedOption = this.options[this.selectedIndex];  
+    for (let option of this.options) {
+      option.removeAttribute('selected');
+    }
+    chrome.storage.sync.set({lastLang:selectedLanguage});
+      selectedOption.setAttribute('selected', 'true');
   });
 
   document.getElementById('lookupButton').addEventListener('click', function() {
-    const wordRaw = document.getElementById('wikiEntry').value;
+      document.getElementById('result').innerHTML = ""
+  document.getElementById('resultForInfs').innerHTML = ""
+    const word = document.getElementById('wikiEntry').value;
     const language = document.getElementById('selectLanguage').value;
-    const word = wordRaw.replaceAll('ō', 'o').replaceAll('ā', 'a')
     document.getElementById('wrongDef').style.display="block";
     console.log(word,language)
     if (word && language) {
@@ -22,6 +27,10 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
             const doc = parser.parseFromString(html, 'text/html');
             if (language == "latin"){
               getLatinAttributes(doc,word);
+            } else if(language == 'german'){
+              getGermanAttributes(doc,word);
+            } else{
+              getLinkedAttributes(doc,word,language)
             }
           })
       } else {
@@ -137,7 +146,7 @@ function getLatinAttributes(doc,word){
           declension+=declensionElements[i].textContent
         }
         declension = declension.replaceAll("firstsecond","first&second").replaceAll("-"," ")
-        declension= declension.slice(0, declension.indexOf('declension')+10).trim();
+        declension= declension.slice(0, declension.indexOf(' ')).trim();
         conjugations.group = declension
         document.getElementById('result').innerHTML +=  `<span style="font-size: 20px; display:"block";margin-left:5%>declension: ${declension}</span>`
       }
@@ -184,6 +193,7 @@ function getLatinAttributes(doc,word){
 
       console.log(vocab)
     }else{ 
+      //case when its a inflection of some other word
       const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
       if(latinElement){
         const anchorTag = latinElement.querySelector('a');
@@ -216,11 +226,17 @@ function getLatinAttributes(doc,word){
         }
        
       }
-    }else{
-      //if()
-      document.getElementById('result').style.display = 'block'
-      document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
-    }
+      }else{
+        // is adv/non camparable word
+        const isLatinWord = doc.querySelector('strong.Latn.headword[lang="la"]');
+        if(isLatinWord){
+         getEasyAttributes(doc,word,"la")
+        }else{
+          document.getElementById('result').style.display = 'block'
+          document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+        }
+        
+      }
   }
   }
   // }catch(error){
@@ -256,10 +272,129 @@ function getLatinAttributes(doc,word){
       
     });
   }
+async function getLinkedAttributes(doc,word,lang){
+  document.getElementById('result').innerHTML = ""
+  document.getElementById('resultForInfs').innerHTML = ""
+  const book = document.getElementById('bookSelector').value;
+  const pronounciation = document.getElementById('pronounciation').value;
+  const gender = document.getElementById('gender').value;
+  const baseFormQuery = 'span.form-of-definition-link i[class="Latn mention"][lang="'+lang+'"]'
+  const hasBaseForm = doc.querySelector(baseFormQuery);
+  if(hasBaseForm){
+    console.log(hasBaseForm)
+    const anchorTag = hasBaseForm.querySelector('a');
+    if (anchorTag) {
+      const linkText = anchorTag.textContent; // Get the text content of the <a>
+      console.log("Anchor text:", linkText);
+      document.getElementById('resultForInfs').style.display = 'block'
+      const spanElement = hasBaseForm.parentElement;
+      const spanElement1 = spanElement.parentElement;
+      const liElement = spanElement1.parentElement;
+      let definition = ""
+      if(liElement){
+        const firstInflection = liElement.querySelector('ol')
+        if(firstInflection){
+          const inflectionDescription = firstInflection.querySelector('li')
+          console.log(inflectionDescription)
+          definition+=inflectionDescription.textContent.trim()
+        }else{
+          definition = liElement.textContent.trim()
+        }
+      }
+      document.getElementById('resultForInfs').innerHTML += definition
+      document.getElementById('resultForInfs').innerHTML+= String.fromCodePoint(0x1F4A0);
+    let noramlizedWord = word.normalize('NFD');
+    let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
+    let finalStr = noDiacritics.replace(/-/g, "");
+    let baseDoc;
+    if(finalStr.trim()!=linkText.trim())  {
+      fetch(`http://localhost:3000/fetch/${linkText}`)
+      .then(response => response.text())
+      .then(html => {
+        // Parse the returned HTML and extract the inflection table
+        const parser = new DOMParser();
+        baseDoc = parser.parseFromString(html, 'text/html');
+        getEasyAttributes(baseDoc,linkText,lang);
+      })
+      setTimeout(() => {
+        definition = document.getElementById("result").textContent+","+definition
+        vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+        console.log(vocab)
+        console.log('This runs after 0.05 second');
+    }, 50);
+      
+    }
+   
+  }
+  }else{ 
+    console.log("is base form")
+    getEasyAttributes(doc,word,lang)
+  }
+}
+async function getEasyAttributes(doc,word,lang){
+  document.getElementById('result').style.display = ""
+  console.log(word)
+  const book = document.getElementById('bookSelector').value;
+  const pronounciation = document.getElementById('pronounciation').value;
+  const gender = document.getElementById('gender').value;
+  const queryWord = 'strong.Latn.headword[lang="'+lang+'"]'
+  const isWord = doc.querySelector(queryWord);
+  console.log(isWord)
+
+  if(isWord){
+    console.log(isWord)
+    const grannyElement = isWord.parentElement.parentElement;
+    const closestOl = grannyElement.nextElementSibling;
+    const liElement = closestOl.querySelector("li"); // Get the text content of the <a>
+    console.log(liElement)
+    document.getElementById('result').style.display = 'block'
+    let definition = ""
+    if(liElement){
+      liElement.querySelectorAll('dl,u,span').forEach(el => el.remove());
+      definition = liElement.textContent.trim()
+      definition = definition.replace(/ *\([^)]*\) */g, "");
+    }
+    baseDef = definition
+    definition = definition.split(";")[0];
+    document.getElementById('result').innerHTML += definition
+    vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+    console.log(vocab)
+    
+    document.getElementById('submit').style.display = 'block'
+    document.getElementById('wrongDef').style.display = 'block'
+  }else{
+    document.getElementById('result').style.display = 'block'
+    document.getElementById('result').innerHTML = 'invalid word for' + formatLanguage(lang)
+    document.getElementById('result').innerHTML = "word could be a special one, or doesnot exist in the language"
+  }
+}
+  
+
+function formatLanguage(str){
+  switch (str) {
+    case "la":
+      return "Latin"
+    case "de":
+      return "German"
+  }
+}
+function getGermanAttributes(doc,word){
+  getEasyAttributes(doc,word,"de")
+  }
 
 document.addEventListener('DOMContentLoaded', (event) => {
   const submitButton = document.getElementById('submit'); 
   const wrongDefButton = document.getElementById('wrongDef'); 
+  const selectLanguage = document.getElementById('selectLanguage');
+  chrome.storage.sync.get('lastLang',function(data){
+    const lastLang = data.lastLang||"latin"
+    for (let i = 0; i < selectLanguage.options.length; i++) {
+      if (selectLanguage.options[i].value === lastLang) {
+        selectLanguage.options[i].selected = true;  // Mark as selected
+        break;  // Exit the loop once the correct option is found
+      }
+    }
+  });
 
   if (submitButton) {
     // Attach click event listener

@@ -25,7 +25,7 @@
     </div>
     <div style="display: block;"class="ui input"> 
       <select class = "ui search dropdown" type="text" id="gender" >
-        <option value=""></option>
+        <option value="">gender(optional)</option>
         <option value="neuter">neuter</option>
         <option value="common">common</option>
         <option value="feminine">feminine</option>
@@ -35,15 +35,28 @@
     <div class="ui input"> 
       <input type="text" id="pronounciation" placeholder="pronounciation (optional)"/>
     </div>
-    <select class = "ui search dropdown" id="bookSelector" style="margin:auto; margin-top: 5px;margin-bottom: 5px;display: block;">
+    <div>
+      <p style="display: inline-block;"> select collection</p>
+    <select class = "ui search dropdown" id="bookSelector" style="margin:auto; margin-top: 5px;margin-bottom: 5px;display:inline-block;">
     </select>
-
+    </div>
     <div class="ui field" id="newBookField" style="display:none;margin-top:5px; margin-bottom: 5px;background-color:#c5d5c7 ; border-radius: 8px;">
       <input type="text" style = "margin-top:5px;margin-bottom: 5px ;"id="newBook" placeholder="Enter new collection name">
       <button class="ui teal basic button"style = "margin-top:5px;margin-bottom: 5px ;" id="addBookButton">Add collection</button>
     </div>
+    <div>
+      <p style="display: inline-block;"> select language to auto query</p>
+    <select class = "ui search dropdown" type="text" style="margin: auto;display: inline-block;justify-content: center;margin-left: 5%;"class = "ui dropdown" id="selectLanguage" >  
+      <option value="latin">Latin</option>
+      <option value="german">German</option>
+      <option value="it">Italian</option>
+      <option value="fr">French</option>
+      <option value="nl">Dutch</option>
+    </select>
+    </div>
     <button style = "display: Block;margin-left: auto;margin-right: auto;" class = "ui button primary" type="submit">Add</button>
     <div style = "border: 1px double;border-color: #5a4f4d; border-radius: 2%;margin-top: 2%;">
+      <div style = "margin-left: 10%;"class = "ui container" id="vocabInfoInfs"></div>
       <div style = "margin-left: 10%;"class = "ui container" id="vocabInfo"></div>
       <button style = "display: none;margin-left: auto;margin-right: auto;" class = "ui button" id= "addAuto">Add to database</button>
     </div>

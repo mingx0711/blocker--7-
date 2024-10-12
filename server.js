@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 app.get('/fetch/:word', async (req, res) => {
-  const word = req.params.word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ū', 'u');
+  const word = req.params.word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ū', 'u').replaceAll('ē', 'e');
   try {
       const fetch = await import('node-fetch'); // Dynamically import node-fetch
       const response = await fetch.default(`https://en.wiktionary.org/wiki/${word}`);
