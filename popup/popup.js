@@ -1,6 +1,6 @@
 let vocab = {}
 let def;
-let usingLocal = false;
+let usingLocal = true;
 document.getElementById('selectLanguage').addEventListener('change', function() {
   let selectedLanguage = this.value;  // Get the selected value
   let word = document.getElementById('word').value.trim();
@@ -424,7 +424,7 @@ async function getEasyAttributes(doc,word,lang){
     document.getElementById('vocabInfo').innerHTML += definition
     document.getElementById('vocabInfo').innerHTML += autoGender?(","+autoGender):""
 
-        vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+    vocab = {word,definition,snoozed: false,book,pronounciation,gender:autoGender?autoGender:gender,seen:0,quizResults: ['n','n','n','n']}
     console.log(vocab)
     document.getElementById("addAuto").style.display = 'block'
   }else{

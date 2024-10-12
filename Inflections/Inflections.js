@@ -1,5 +1,5 @@
 let vocab = {}
-let usingLocal = false;
+let usingLocal = true;
 function removeDiacritics(str) {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
