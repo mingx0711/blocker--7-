@@ -1,4 +1,5 @@
 let vocab = {}
+let usingLocal = false;
 function removeDiacritics(str) {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
@@ -22,8 +23,8 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
     if (word && language) {
       word = removeDiacritics(word)
       console.log(word,language)
-        // Call the backend server instead of Wiktionary directly
-        fetch(`http://localhost:3000/fetch/${word}`)
+      url = usingLocal?`http://localhost:3000/fetch/${word}`:`https://en.wiktionary.org/wiki/${word}`
+      fetch(url)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
@@ -247,8 +248,8 @@ function getLatinAttributes(doc,word){
         let finalStr = noDiacritics.replace(/-/g, "");
 
         if(finalStr.trim()!=linkText.trim())  {
-          fetch(`http://localhost:3000/fetch/${linkText}`)
-          .then(response => response.text())
+          url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+          fetch(url).then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
             const parser = new DOMParser();
@@ -340,7 +341,8 @@ async function getLinkedAttributes(doc,word,lang){
     let finalStr = noDiacritics.replace(/-/g, "");
     let baseDoc;
     if(finalStr.trim()!=linkText.trim())  {
-      fetch(`http://localhost:3000/fetch/${linkText}`)
+      url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+      fetch(url)
       .then(response => response.text())
       .then(html => {
         // Parse the returned HTML and extract the inflection table

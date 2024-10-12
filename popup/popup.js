@@ -1,5 +1,6 @@
 let vocab = {}
 let def;
+let usingLocal = false;
 document.getElementById('selectLanguage').addEventListener('change', function() {
   let selectedLanguage = this.value;  // Get the selected value
   let word = document.getElementById('word').value.trim();
@@ -51,7 +52,8 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
     });
   }else{
     word = removeDiacritics(word)
-    fetch(`http://localhost:3000/fetch/${word}`)
+    url = usingLocal?`http://localhost:3000/fetch/${word}`:`https://en.wiktionary.org/wiki/${word}`
+    fetch(url)
     .then(response => response.text())
     .then(html => {
       // Parse the returned HTML and extract the inflection table
@@ -285,7 +287,8 @@ function getLatinAttributes(doc,word){
         let finalStr = noDiacritics.replace(/-/g, "");
  
         if(finalStr.trim()!=linkText.trim())  {
-          fetch(`http://localhost:3000/fetch/${linkText}`)
+          url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+          fetch(url)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
@@ -348,7 +351,8 @@ async function getLinkedAttributes(doc,word,lang){
     let finalStr = noDiacritics.replace(/-/g, "");
     let baseDoc;
     if(finalStr.trim()!=linkText.trim())  {
-      fetch(`http://localhost:3000/fetch/${linkText}`)
+      url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+      fetch(url)
       .then(response => response.text())
       .then(html => {
         // Parse the returned HTML and extract the inflection table
