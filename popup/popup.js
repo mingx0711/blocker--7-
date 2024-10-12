@@ -50,8 +50,8 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
       });
     });
   }else{
-    word = word.replaceAll('ō', 'o').replaceAll('ā', 'a').replaceAll('ī', 'i').replaceAll('ā', 'a')
-    fetch(`https://en.wiktionary.org/wiki/${word}`)
+    word = removeDiacritics(word)
+    fetch(`http://localhost:3000/fetch/${word}`)
     .then(response => response.text())
     .then(html => {
       // Parse the returned HTML and extract the inflection table
@@ -64,13 +64,30 @@ document.getElementById('addVocabForm').addEventListener('submit', function(e) {
             } else{
               getLinkedAttributes(doc,word,language)
             }
-      getLatinAttributes(doc,word);
     })
+    updateLanguageList(language);
   }
   populateBookSelector();
 
 
 });
+function updateLanguageList(lang){
+  chrome.storage.sync.get({ languageList: {}}, (data) => {
+
+    let languageList = data.languageList|| {};
+    if(languageList[lang]){
+      languageList[lang]+=1
+    }else{
+      languageList[lang]=1
+    }
+    chrome.storage.sync.set({languageList:languageList }, function() {
+      console.log(languageList)
+    });
+  });
+}
+function removeDiacritics(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 function getLatinAttributes(doc,word){
   const book = document.getElementById('bookSelector').value;
   const pronounciation = document.getElementById('pronounciation').value;
@@ -90,7 +107,7 @@ function getLatinAttributes(doc,word){
   if (verbInflectionTable) {
     let anchorElement = doc.querySelector('#mw-content-text > div.mw-content-ltr.mw-parser-output > table > tbody > tr:nth-child(1) > th a[href]');
     if(!anchorElement){
-       document.getElementById('result').innerHTML += "No such words"
+       document.getElementById('VocabInfo').innerHTML += "No such words"
     }
     conjugations.group=anchorElement.textContent;
     let definition = ""
@@ -177,6 +194,31 @@ function getLatinAttributes(doc,word){
         declension = declension.replaceAll("firstsecond","first&second").replaceAll("-"," ")
         conjugations.group = declension
       }
+      const queryWord = 'strong.Latn.headword[lang="la"]'
+      const isWord = doc.querySelector(queryWord);
+      let autoGender = ''
+      if(isWord){
+        const grannyElement = isWord.parentElement.parentElement;
+        const genderSpan = grannyElement.querySelector("span.gender");
+        if(genderSpan){
+          console.log(genderSpan)
+          const genderDef = genderSpan.firstChild.textContent;
+          console.log(genderDef);
+          switch(genderDef){
+            case 'f':
+              autoGender = 'feminine'
+              break;
+            case 'm':
+              autoGender = 'masculine'
+              break;
+            case 'n':
+              autoGender = 'neuter'
+              break;
+            default:
+              break;
+          }
+        }
+      }
       let closestOl = null;
       const latinHeading = doc.querySelector('h2#Latin');
       const closestDiv = latinHeading.closest('div');
@@ -209,12 +251,16 @@ function getLatinAttributes(doc,word){
       });
       conjugations.type = 'latin';
       const vocabInfo = document.getElementById('vocabInfo');
-      vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
+      vocab = {word,definition,snoozed: false,book,pronounciation,gender:autoGender?autoGender:gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
       vocabInfo.textContent=""
       vocabInfo.textContent+=" word: "+vocab.word
       vocabInfo.textContent+="| \n definition: "+vocab.definition
+      if(autoGender){
+      vocabInfo.textContent+="| \n gender: "+autoGender
+      }
       vocabInfo.textContent+="| \n group: "+vocab.conjugations.group
       vocabInfo.textContent+="| \n collection: "+vocab.book
+      vocab = {word,definition,snoozed: false,book,pronounciation,gender:autoGender?autoGender:gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
 
       conjugations.type = 'latin';
       document.getElementById("addAuto").style.display = 'block'
@@ -239,7 +285,7 @@ function getLatinAttributes(doc,word){
         let finalStr = noDiacritics.replace(/-/g, "");
  
         if(finalStr.trim()!=linkText.trim())  {
-          fetch(`https://en.wiktionary.org/wiki/${linkText}`)
+          fetch(`http://localhost:3000/fetch/${linkText}`)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
@@ -258,8 +304,8 @@ function getLatinAttributes(doc,word){
       if(isLatinWord){
        getEasyAttributes(doc,word,"la")
       }else{
-        document.getElementById('result').style.display = 'block'
-        document.getElementById('result').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
+        document.getElementById('vocabInfo').style.display = 'block'
+        document.getElementById('vocabInfo').innerHTML = 'invalid word(either does not exist in latin or does not have a normal conjugation table or is not in base form.)'
       }
       
       }
@@ -327,6 +373,8 @@ async function getLinkedAttributes(doc,word,lang){
   }
 }
 async function getEasyAttributes(doc,word,lang){
+  
+  document.getElementById('vocabInfo').innerHTML = ''
   document.getElementById('vocabInfo').style.display = ""
   console.log(word)
   const book = document.getElementById('bookSelector').value;
@@ -334,8 +382,6 @@ async function getEasyAttributes(doc,word,lang){
   const gender = document.getElementById('gender').value;
   const queryWord = 'strong.Latn.headword[lang="'+lang+'"]'
   const isWord = doc.querySelector(queryWord);
-  console.log(isWord)
-
   if(isWord){
     console.log(isWord)
     const grannyElement = isWord.parentElement.parentElement;
@@ -349,15 +395,37 @@ async function getEasyAttributes(doc,word,lang){
       definition = liElement.textContent.trim()
       definition = definition.replace(/ *\([^)]*\) */g, "");
     }
+    let autoGender = ''
+    const genderSpan = grannyElement.querySelector("span.gender");
+    if(genderSpan){
+      console.log(genderSpan)
+      const genderDef = genderSpan.firstChild.textContent;
+      console.log(genderDef);
+      switch(genderDef){
+        case 'f':
+          autoGender = 'feminine'
+          break;
+        case 'm':
+          autoGender = 'masculine'
+          break;
+        case 'n':
+          autoGender = 'neuter'
+          break;
+        default:
+          break;
+      }
+    }
     baseDef = definition
     definition = definition.split(";")[0];
     document.getElementById('vocabInfo').innerHTML += definition
-    vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+    document.getElementById('vocabInfo').innerHTML += autoGender?(","+autoGender):""
+
+        vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
     console.log(vocab)
     document.getElementById("addAuto").style.display = 'block'
   }else{
     document.getElementById('vocabInfo').style.display = 'block'
-    document.getElementById('vocabInfo').innerHTML = 'invalid word for' + formatLanguage(lang)
+    document.getElementById('vocabInfo').innerHTML = 'invalidaaaaaaaaaaaaaaaaaaa word for' + formatLanguage(lang)
     document.getElementById('vocabInfo').innerHTML = "word could be a special one, or doesnot exist in the language"
   }
 }
@@ -373,7 +441,7 @@ function formatLanguage(str){
   }
 }
 function getGermanAttributes(doc,word){
-  getEasyAttributes(doc,word,"de")
+  getLinkedAttributes(doc,word,"de")
   }
 function populateBookSelector() {
   chrome.storage.sync.get({ bookList: [] }, (result) => {
@@ -405,6 +473,23 @@ function populateBookSelector() {
 }
 document.addEventListener('DOMContentLoaded', (event) => {
   const selectLanguage = document.getElementById('selectLanguage');
+  chrome.storage.sync.get('languageList',function(data){
+    if(data.languageList){
+      console.log(data.languageList)
+      let optionsArray = Array.from(selectLanguage.options);
+      optionsArray.sort((a, b) => {
+        const valueA = data.languageList[a.value] || 0;  // default to 0 if not in the dictionary
+        const valueB = data.languageList[b.value] || 0;  // default to 0 if not in the dictionary
+        return valueB - valueA;  // Descending order
+      });
+      selectLanguage.innerHTML = '';
+      console.log(optionsArray)
+      optionsArray.forEach(option => {
+        selectLanguage.add(option);
+      });
+    }
+
+  });
   chrome.storage.sync.get('lastLang',function(data){
     const lastLang = data.lastLang||"latin"
     for (let i = 0; i < selectLanguage.options.length; i++) {

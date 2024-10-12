@@ -1,4 +1,7 @@
 let vocab = {}
+function removeDiacritics(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 document.getElementById('selectLanguage').addEventListener('change', function() {
     let selectedLanguage = this.value;  // Get the selected value
     let word = document.getElementById("wikiEntry").value;
@@ -13,13 +16,14 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
   document.getElementById('lookupButton').addEventListener('click', function() {
       document.getElementById('result').innerHTML = ""
   document.getElementById('resultForInfs').innerHTML = ""
-    const word = document.getElementById('wikiEntry').value;
+    let word = document.getElementById('wikiEntry').value;
     const language = document.getElementById('selectLanguage').value;
     document.getElementById('wrongDef').style.display="block";
-    console.log(word,language)
     if (word && language) {
+      word = removeDiacritics(word)
+      console.log(word,language)
         // Call the backend server instead of Wiktionary directly
-        fetch(`https://en.wiktionary.org/wiki/${word}`)
+        fetch(`http://localhost:3000/fetch/${word}`)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
@@ -29,14 +33,16 @@ document.getElementById('selectLanguage').addEventListener('change', function() 
               getLatinAttributes(doc,word);
             } else if(language == 'german'){
               getGermanAttributes(doc,word);
-            } else{
+            } else {
               getLinkedAttributes(doc,word,language)
             }
           })
+    updateLanguageList(language);
       } else {
         alert('Please enter a word and select a language.');
       }});
     
+
 function getLatinAttributes(doc,word){
   //try{
   document.getElementById('submit').display = 'none'
@@ -150,6 +156,32 @@ function getLatinAttributes(doc,word){
         conjugations.group = declension
         document.getElementById('result').innerHTML +=  `<span style="font-size: 20px; display:"block";margin-left:5%>declension: ${declension}</span>`
       }
+      const queryWord = 'strong.Latn.headword[lang="la"]'
+      const isWord = doc.querySelector(queryWord);
+      let autoGender = ''
+
+      if(isWord){
+        const grannyElement = isWord.parentElement.parentElement;
+        const genderSpan = grannyElement.querySelector("span.gender");
+        if(genderSpan){
+          console.log(genderSpan)
+          const genderDef = genderSpan.firstChild.textContent;
+          console.log(genderDef);
+          switch(genderDef){
+            case 'f':
+              autoGender = 'feminine'
+              break;
+            case 'm':
+              autoGender = 'masculine'
+              break;
+            case 'n':
+              autoGender = 'neuter'
+              break;
+            default:
+              break;
+          }
+        }
+      }
       let closestOl = null;
       const latinHeading = doc.querySelector('h2#Latin');
       const closestDiv = latinHeading.closest('div');
@@ -189,7 +221,7 @@ function getLatinAttributes(doc,word){
 
       document.getElementById('result').innerHTML +=  `<span style="font-size: 20px;display:"block";margin-left:5%>,definition:${definition}</span>`
       document.getElementById('result').innerHTML += nounInflectionTable.outerHTML;
-      vocab = {word,definition,snoozed: false,book,pronounciation,gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
+      vocab = {word,definition,snoozed: false,book,pronounciation,gender:autoGender?autoGender:gender,conjugations,seen:0,quizResults: ['n','n','n','n']}
 
       console.log(vocab)
     }else{ 
@@ -215,7 +247,7 @@ function getLatinAttributes(doc,word){
         let finalStr = noDiacritics.replace(/-/g, "");
 
         if(finalStr.trim()!=linkText.trim())  {
-          fetch(`https://en.wiktionary.org/wiki/${linkText}`)
+          fetch(`http://localhost:3000/fetch/${linkText}`)
           .then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
@@ -339,14 +371,10 @@ async function getEasyAttributes(doc,word,lang){
   const gender = document.getElementById('gender').value;
   const queryWord = 'strong.Latn.headword[lang="'+lang+'"]'
   const isWord = doc.querySelector(queryWord);
-  console.log(isWord)
-
   if(isWord){
-    console.log(isWord)
     const grannyElement = isWord.parentElement.parentElement;
     const closestOl = grannyElement.nextElementSibling;
     const liElement = closestOl.querySelector("li"); // Get the text content of the <a>
-    console.log(liElement)
     document.getElementById('result').style.display = 'block'
     let definition = ""
     if(liElement){
@@ -354,10 +382,37 @@ async function getEasyAttributes(doc,word,lang){
       definition = liElement.textContent.trim()
       definition = definition.replace(/ *\([^)]*\) */g, "");
     }
+    let autoGender = ''
+    const genderSpan = grannyElement.querySelector("span.gender");
+    if(genderSpan){
+      console.log(genderSpan)
+      const genderDef = genderSpan.firstChild.textContent;
+      console.log(genderDef);
+      switch(genderDef){
+        case 'f':
+          autoGender = 'feminine'
+          break;
+        case 'm':
+          autoGender = 'masculine'
+          break;
+        case 'n':
+          autoGender = 'neuter'
+          break;
+        default:
+          break;
+      }
+    }
     baseDef = definition
     definition = definition.split(";")[0];
     document.getElementById('result').innerHTML += definition
-    vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+    document.getElementById('result').innerHTML += autoGender?(","+autoGender):""
+
+    if(autoGender!=''){
+      vocab = {word,definition,snoozed: false,book,pronounciation,gender:autoGender,seen:0,quizResults: ['n','n','n','n']}
+    }else{
+      vocab = {word,definition,snoozed: false,book,pronounciation,gender,seen:0,quizResults: ['n','n','n','n']}
+
+    }
     console.log(vocab)
     
     document.getElementById('submit').style.display = 'block'
@@ -379,13 +434,42 @@ function formatLanguage(str){
   }
 }
 function getGermanAttributes(doc,word){
-  getEasyAttributes(doc,word,"de")
+  getLinkedAttributes(doc,word,"de")
   }
+function updateLanguageList(lang){
+  chrome.storage.sync.get({ languageList: {}}, (data) => {
 
+    let languageList = data.languageList|| {};
+    if(languageList[lang]){
+      languageList[lang]+=1
+    }else{
+      languageList[lang]=1
+    }
+    chrome.storage.sync.set({languageList:languageList }, function() {
+      console.log(languageList)
+    });
+  });
+}
 document.addEventListener('DOMContentLoaded', (event) => {
   const submitButton = document.getElementById('submit'); 
   const wrongDefButton = document.getElementById('wrongDef'); 
   const selectLanguage = document.getElementById('selectLanguage');
+  chrome.storage.sync.get('languageList',function(data){
+    if(data.languageList){
+      console.log(data.languageList)
+      let optionsArray = Array.from(selectLanguage.options);
+      optionsArray.sort((a, b) => {
+        const valueA = data.languageList[a.value] || 0;  // default to 0 if not in the dictionary
+        const valueB = data.languageList[b.value] || 0;  // default to 0 if not in the dictionary
+        return valueB - valueA;  // Descending order
+      });
+      selectLanguage.innerHTML = '';
+      optionsArray.forEach(option => {
+        selectLanguage.add(option);
+      });
+    }
+
+  });
   chrome.storage.sync.get('lastLang',function(data){
     const lastLang = data.lastLang||"latin"
     for (let i = 0; i < selectLanguage.options.length; i++) {
