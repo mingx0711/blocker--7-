@@ -726,6 +726,10 @@ function adjustFontSize(){
   }
   
   function showCorrectAnswer() {
+    const quizContainer = document.querySelector('.quiz-container');
+    quizContainer.style.display = "none";
+    const tfContainer = document.querySelector('.true-false-container');
+    tfContainer.style.display = "none";
     const vocabFlashcard = document.getElementById('correctDefinition');
     vocabFlashcard.style.display = 'block';
     const correctVocab = vocabList.find(entry => entry.word === currentQuizWord);

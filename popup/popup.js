@@ -1,6 +1,6 @@
 let vocab = {}
 let def;
-let usingLocal = true;
+let usingLocal = false;
 document.getElementById('selectLanguage').addEventListener('change', function() {
   let selectedLanguage = this.value;  // Get the selected value
   let word = document.getElementById('word').value.trim();
