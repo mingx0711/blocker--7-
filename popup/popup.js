@@ -268,7 +268,7 @@ function getLatinAttributes(doc,word){
       document.getElementById("addAuto").style.display = 'block'
       console.log(vocab)
      }else{
-      const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
+      const latinElement = doc.querySelector('span.form-of-definition-link i.Latn.mention[lang="la"]');
       if(latinElement){
         const anchorTag = latinElement.querySelector('a');
         if (anchorTag) {
@@ -422,15 +422,14 @@ async function getEasyAttributes(doc,word,lang){
     baseDef = definition
     definition = definition.split(";")[0];
     document.getElementById('vocabInfo').innerHTML += definition
-    document.getElementById('vocabInfo').innerHTML += autoGender?(","+autoGender):""
+    document.getElementById('vocabInfo').innerHTML += autoGender?("|gender:"+autoGender):""
 
     vocab = {word,definition,snoozed: false,book,pronounciation,gender:autoGender?autoGender:gender,seen:0,quizResults: ['n','n','n','n']}
     console.log(vocab)
     document.getElementById("addAuto").style.display = 'block'
   }else{
     document.getElementById('vocabInfo').style.display = 'block'
-    document.getElementById('vocabInfo').innerHTML = 'invalidaaaaaaaaaaaaaaaaaaa word for' + formatLanguage(lang)
-    document.getElementById('vocabInfo').innerHTML = "word could be a special one, or doesnot exist in the language"
+    document.getElementById('vocabInfo').innerHTML = "word could need correct capitalizations, be a special word, or doesnot exist in the language"
   }
 }
 document.getElementById('manageButton').addEventListener('click', function() {

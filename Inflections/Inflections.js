@@ -227,7 +227,7 @@ function getLatinAttributes(doc,word){
       console.log(vocab)
     }else{ 
       //case when its a inflection of some other word
-      const latinElement = doc.querySelector('i.Latn.mention[lang="la"]');
+      const latinElement = doc.querySelector('.form-of-definition-link i.Latn.mention[lang="la"]');
       if(latinElement){
         const anchorTag = latinElement.querySelector('a');
         if (anchorTag) {
@@ -422,7 +422,7 @@ async function getEasyAttributes(doc,word,lang){
   }else{
     document.getElementById('result').style.display = 'block'
     document.getElementById('result').innerHTML = 'invalid word for' + formatLanguage(lang)
-    document.getElementById('result').innerHTML = "word could be a special one, or doesnot exist in the language"
+    document.getElementById('result').innerHTML = "word could need correct capitalization, be a special word, or doesnot exist in the language"
   }
 }
   
