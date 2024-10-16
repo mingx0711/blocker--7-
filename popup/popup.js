@@ -149,7 +149,7 @@ function getLatinAttributes(doc,word){
       }if(spanElement.className.includes('|p|')){conjugations.number.plural.push(childText);
       }if(spanElement.className.includes('pres')){ conjugations.tense.present.push(childText);
       }if(spanElement.className.includes('impf')){conjugations.tense.imperfect.push(childText);
-      }if(spanElement.className.includes('fut')){conjugations.tense.future.push(childText);
+      }if(spanElement.className.includes('fut|')){conjugations.tense.future.push(childText);
       }if(spanElement.className.includes('perf')){conjugations.tense.perfect.push(childText);
       }if(spanElement.className.includes('plup')){conjugations.tense.pluperfect.push(childText);
       }if(spanElement.className.includes('futp')){conjugations.tense.futurePerfect.push(childText);
@@ -194,6 +194,7 @@ function getLatinAttributes(doc,word){
           declension+=declensionElements[i].textContent
         }
         declension = declension.replaceAll("firstsecond","first&second").replaceAll("-"," ")
+        declension= declension.slice(0, declension.indexOf(' ')).trim();        
         conjugations.group = declension
       }
       const queryWord = 'strong.Latn.headword[lang="la"]'

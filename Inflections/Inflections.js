@@ -109,7 +109,7 @@ function getLatinAttributes(doc,word){
       }if(spanElement.className.includes('|p|')){conjugations.number.plural.push(childText);
       }if(spanElement.className.includes('pres')){ conjugations.tense.present.push(childText);
       }if(spanElement.className.includes('impf')){conjugations.tense.imperfect.push(childText);
-      }if(spanElement.className.includes('fut')){conjugations.tense.future.push(childText);
+      }if(spanElement.className.includes('fut|')){conjugations.tense.future.push(childText);
       }if(spanElement.className.includes('perf')){conjugations.tense.perfect.push(childText);
       }if(spanElement.className.includes('plup')){conjugations.tense.pluperfect.push(childText);
       }if(spanElement.className.includes('futp')){conjugations.tense.futurePerfect.push(childText);
@@ -199,20 +199,31 @@ function getLatinAttributes(doc,word){
       const firstListItem = sibling.querySelector('li');
       firstListItem.querySelectorAll('dl,ul').forEach(el => el.remove());
       definition = firstListItem.textContent.trim();
-      conjugations.number = {singular:[],plural:[]}
-      conjugations.case = {nominative:[],genitive:[],dative:[],accusative:[],ablative:[],vocative:[]}
+      conjugations.inflections = {singular_nominative:[],
+        plural_nominative:[],singular_genitive:[],
+        plural_genitive:[],singular_dative:[],
+        plural_dative:[],singular_accusative:[],
+        plural_accusative:[],singular_ablative:[],
+        plural_ablative:[],singular_vocative:[],
+        plural_vocative:[],
+      
+      }
       let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
       spanElements.forEach((spanElement) => {
         let childText = spanElement.firstElementChild.textContent;
-        if(spanElement.className.includes('s-')){conjugations.number.singular.push(childText);
-        }if(spanElement.className.includes('p-')){conjugations.number.plural.push(childText);
-        }if(spanElement.className.includes('nom')){conjugations.case.nominative.push(childText);
-        }if(spanElement.className.includes('gen')){conjugations.case.genitive.push(childText);
-        }if(spanElement.className.includes('dat')){conjugations.case.dative.push(childText);
-        }if(spanElement.className.includes('acc')){conjugations.case.accusative.push(childText);
-        }if(spanElement.className.includes('abl')){conjugations.case.ablative.push(childText);
-        }if(spanElement.className.includes('voc')){conjugations.case.vocative.push(childText);
-        }
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('nom')){conjugations.inflections.singular_nominative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('nom')){conjugations.inflections.plural_nominative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('acc')){conjugations.inflections.singular_accusative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('acc')){conjugations.inflections.plural_accusative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('dat')){conjugations.inflections.singular_dative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('dat')){conjugations.inflections.plural_dative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('gen')){conjugations.inflections.singular_genitive.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('gen')){conjugations.inflections.plural_genitive.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('voc')){conjugations.inflections.singular_vocative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('voc')){conjugations.inflections.plural_vocative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('abl')){conjugations.inflections.singular_ablative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('abl')){conjugations.inflections.plural_ablative.push(childText);}
+
       });
       baseDef = definition
       conjugations.type = 'latin';
@@ -499,8 +510,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
       }
       chrome.storage.local.get('vocabList', function(data) {    
         let vocabList = data.vocabList || [];
-        console.log(vocabList)
         vocabList.push(vocab)
+        console.log(vocabList)
         chrome.storage.local.set({ vocabList: vocabList }, function() {
         });
       });  

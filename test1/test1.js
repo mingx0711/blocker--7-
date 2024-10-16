@@ -469,6 +469,8 @@ function adjustFontSize(){
   }
   function makeStringReadable(names){
     names = names.replace("futurePerfect", 'future perfect');
+    names = names.replaceAll("_", ' ');
+
     return names
   }
   function findSubfieldsForWord(word, conjugations) {
@@ -567,8 +569,8 @@ function adjustFontSize(){
         }    
         }else{
             console.log("not a verb")
-            numberOfFields = 2;
-            selectedField = ['case','number'];
+            numberOfFields = 1;
+            selectedField = ['inflections'];
         }
     
         let selectedKeys = getRandomKeysFromArray(selectedField, numberOfFields);
@@ -732,6 +734,8 @@ function adjustFontSize(){
     tfContainer.style.display = "none";
     const vocabFlashcard = document.getElementById('correctDefinition');
     vocabFlashcard.style.display = 'block';
+    const nextButton = document.getElementById('nextAfterIncorrectButton');
+    nextButton.style.display = 'block';
     const correctVocab = vocabList.find(entry => entry.word === currentQuizWord);
     if (correctVocab) {
       vocabFlashcard.innerHTML+= String.fromCodePoint(0x1F4A0);

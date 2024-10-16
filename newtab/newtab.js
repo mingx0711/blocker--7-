@@ -748,6 +748,7 @@ function getRandomWordFromConjugations(conjugations,commonWordsList=[]) {
 }
 function makeStringReadable(names){
   names = names.replace("futurePerfect", 'future perfect');
+  names = names.replaceAll("_", ' ');
   return names
 }
 function findSubfieldsForWord(word, conjugations) {
@@ -846,9 +847,8 @@ function quizStyle6()
           selectedField = verbFields3
       }    
       }else{
-          console.log("not a verb")
-          numberOfFields = 2;
-          selectedField = ['case','number'];
+          numberOfFields = 1;
+          selectedField = ['inflections'];
       }
   
       let selectedKeys = getRandomKeysFromArray(selectedField, numberOfFields);
@@ -1016,6 +1016,9 @@ function showCorrectAnswer() {
   quizContainer.style.display = "none";
   const tfContainer = document.querySelector('.true-false-container');
   tfContainer.style.display = "none";
+  const nextButton = document.getElementById('nextAfterIncorrectButton');
+  nextButton.style.display = 'block';
+  
   const vocabFlashcard = document.getElementById('correctDefinition');
   vocabFlashcard.style.display = 'block';
   const correctVocab = vocabList.find(entry => entry.word === currentQuizWord);

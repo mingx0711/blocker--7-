@@ -141,10 +141,10 @@ function showNextItem() {
     console.log(quizStyle);
     switch(quizStyle){
       case 0:
-        quizStyle7();
+        quizStyle6();
         break;
       case 1:
-        quizStyle6();
+        quizStyle7();
         break;
     }
   }
@@ -205,11 +205,6 @@ function getRandomKeys(obj, count) {
     }
     return selectedKeys;
 }
-function getRandomSubfield(obj) {
-    let keys = Object.keys(obj);
-    let randomKey = keys[Math.floor(Math.random() * keys.length)];
-    return randomKey;
-}
 function getRandomElement(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
@@ -224,7 +219,9 @@ function getRandomKeysFromArray(array, count) {
   
   // Helper function to get random subfield from an object
   function getRandomSubfield(obj) {
+    console.log(obj)
     const keys = Object.keys(obj);
+    console.log(keys)
     const validKeys = keys.filter(field => (field !== 'pos')&&(field !== 'type'));
     const randomKey = validKeys[Math.floor(Math.random() * keys.length)];
     return randomKey;
@@ -286,7 +283,7 @@ function getRandomKeysFromArray(array, count) {
     return combinedSubfields;
   }
   function makeStringReadable(names){
-    names = names.replace("futurePerfect", 'future perfect');
+    names = names.replaceAll("_", ' ');
     return names
   }
 function quizStyle6(){
@@ -307,6 +304,7 @@ function quizStyle6(){
   let selectedField;
   let questionText = ""
   let options = []
+  let conjugationLists = [];
   console.log(correctVocab.word)
   if((getRandomNumber(1,9))>=8){
     questionText = "what is the group of " + correctVocab.word
@@ -354,15 +352,14 @@ function quizStyle6(){
       }    
       }else{
           console.log("not a verb")
-          numberOfFields = 2;
-          selectedField = ['case','number'];
+          numberOfFields = 1;
+          selectedField = ['inflections'];
       }
   
       let selectedKeys = getRandomKeysFromArray(selectedField, numberOfFields);
-      let conjugationLists = [];
       selectedKeys.forEach(field => {
           const subfield = getRandomSubfield(conjugations[field]);
-          console.log(subfield)
+          console.log(conjToTest)
           conjToTest.push(subfield);
           conjugationLists.push(conjugations[field][subfield]);
         });
@@ -534,7 +531,7 @@ function quizStyle7(){
         vocabFlashcard.textContent+= correctConj
         vocabFlashcard.textContent+= " is one of the "
         vocabFlashcard.textContent+= makeStringReadable(conjToTest.toString())
-        vocabFlashcard.textContent+= "form of "
+        vocabFlashcard.textContent+= " form of "
         vocabFlashcard.textContent+= correctVocab.word
       }if(conjToTest.length>0&&quizType=="conjTest2"){
         vocabFlashcard.innerHTML+= String.fromCodePoint(0x1F4A0);

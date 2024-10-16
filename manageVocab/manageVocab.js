@@ -116,6 +116,7 @@ function updateVocabList(vocabList, collection = ["all"]) {
       deleteButton.classList.add("ui","button");
       deleteButton.textContent = 'Delete';
       deleteButton.addEventListener('click', function() {
+        console.log(entry.word)
         vocabList = vocabList.filter(item => item.word !== entry.word);
         chrome.storage.local.set({ vocabList: vocabList }, function() {
           updateVocabList(vocabList,collection);  // Update the displayed list
