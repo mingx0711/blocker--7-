@@ -847,8 +847,14 @@ function quizStyle6()
           selectedField = verbFields3
       }    
       }else{
+        console.log("not a verb")
+        if(conjugations.inflections){
           numberOfFields = 1;
           selectedField = ['inflections'];
+        }else{
+          console.log(correctVocab.word + "data format outdatted ")
+          showNextItem();
+        }
       }
   
       let selectedKeys = getRandomKeysFromArray(selectedField, numberOfFields);

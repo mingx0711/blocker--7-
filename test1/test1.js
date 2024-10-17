@@ -569,8 +569,13 @@ function adjustFontSize(){
         }    
         }else{
             console.log("not a verb")
-            numberOfFields = 1;
-            selectedField = ['inflections'];
+            if(conjugations.inflections){
+              numberOfFields = 1;
+              selectedField = ['inflections'];
+            }else{
+              console.log(correctVocab.word + "data format outdatted ")
+              showNextItem();
+            }
         }
     
         let selectedKeys = getRandomKeysFromArray(selectedField, numberOfFields);
