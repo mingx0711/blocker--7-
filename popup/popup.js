@@ -1,6 +1,7 @@
 let vocab = {}
 let def;
 let usingLocal = false;
+
 document.getElementById('selectLanguage').addEventListener('change', function() {
   let selectedLanguage = this.value;  // Get the selected value
   let word = document.getElementById('word').value.trim();
@@ -237,20 +238,31 @@ function getLatinAttributes(doc,word){
       const firstListItem = sibling.querySelector('li');
       firstListItem.querySelectorAll('dl,ul').forEach(el => el.remove());
       definition = firstListItem.textContent.trim();
-      conjugations.number = {singular:[],plural:[]}
-      conjugations.case = {nominative:[],genitive:[],dative:[],accusative:[],ablative:[],vocative:[]}
+      conjugations.inflections = {singular_nominative:[],
+        plural_nominative:[],singular_genitive:[],
+        plural_genitive:[],singular_dative:[],
+        plural_dative:[],singular_accusative:[],
+        plural_accusative:[],singular_ablative:[],
+        plural_ablative:[],singular_vocative:[],
+        plural_vocative:[],
+      
+      }
       let spanElements = doc.querySelectorAll('span.Latn.form-of.lang-la');
       spanElements.forEach((spanElement) => {
         let childText = spanElement.firstElementChild.textContent;
-        if(spanElement.className.includes('s-')){conjugations.number.singular.push(childText);
-        }if(spanElement.className.includes('p-')){conjugations.number.plural.push(childText);
-        }if(spanElement.className.includes('nom')){conjugations.case.nominative.push(childText);
-        }if(spanElement.className.includes('gen')){conjugations.case.genitive.push(childText);
-        }if(spanElement.className.includes('dat')){conjugations.case.dative.push(childText);
-        }if(spanElement.className.includes('acc')){conjugations.case.accusative.push(childText);
-        }if(spanElement.className.includes('abl')){conjugations.case.ablative.push(childText);
-        }if(spanElement.className.includes('voc')){conjugations.case.vocative.push(childText);
-        }
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('nom')){conjugations.inflections.singular_nominative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('nom')){conjugations.inflections.plural_nominative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('acc')){conjugations.inflections.singular_accusative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('acc')){conjugations.inflections.plural_accusative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('dat')){conjugations.inflections.singular_dative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('dat')){conjugations.inflections.plural_dative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('gen')){conjugations.inflections.singular_genitive.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('gen')){conjugations.inflections.plural_genitive.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('voc')){conjugations.inflections.singular_vocative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('voc')){conjugations.inflections.plural_vocative.push(childText);}
+        if(spanElement.className.includes('s-')&&spanElement.className.includes('abl')){conjugations.inflections.singular_ablative.push(childText);}
+        if(spanElement.className.includes('p-')&&spanElement.className.includes('abl')){conjugations.inflections.plural_ablative.push(childText);}
+
       });
       conjugations.type = 'latin';
       const vocabInfo = document.getElementById('vocabInfo');
@@ -286,9 +298,10 @@ function getLatinAttributes(doc,word){
         let noramlizedWord = word.normalize('NFD');
         let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
         let finalStr = noDiacritics.replace(/-/g, "");
- 
-        if(finalStr.trim()!=linkText.trim())  {
-          url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+        let finallinkText = removeDiacritics(linkText)
+        console.log("finallinkText is "+ finallinkText)
+        if(finalStr.trim()!=finallinkText.trim())  {
+          url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${finallinkText}`
           fetch(url)
           .then(response => response.text())
           .then(html => {
@@ -350,9 +363,11 @@ async function getLinkedAttributes(doc,word,lang){
     let noramlizedWord = word.normalize('NFD');
     let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
     let finalStr = noDiacritics.replace(/-/g, "");
-    let baseDoc;
+    let baseDoc;        
+    let finallinkText = removeDiacritics(linkText)
+
     if(finalStr.trim()!=linkText.trim())  {
-      url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+      url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${finallinkText}`
       fetch(url)
       .then(response => response.text())
       .then(html => {
@@ -589,7 +604,7 @@ document.getElementById('addAuto').addEventListener('click', function(e) {
       messageDiv.textContent = `The word has been added to the list.`;
 
       // Clear form fields
-      document.getElementById('addVocabForm').reset();
+      //document.getElementById('addVocabForm').reset();
 
       // Clear the message after a few seconds
       setTimeout(() => {

@@ -257,9 +257,11 @@ function getLatinAttributes(doc,word){
         let noramlizedWord = word.normalize('NFD');
         let noDiacritics = noramlizedWord.replace(/[\u0300-\u036f]/g, "");
         let finalStr = noDiacritics.replace(/-/g, "");
-
-        if(finalStr.trim()!=linkText.trim())  {
-          url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${linkText}`
+        let noramlizedlinkText = linkText.normalize('NFD');
+        let noDiacriticslinkText = noramlizedlinkText.replace(/[\u0300-\u036f]/g, "");
+        let finallinkText = noDiacriticslinkText.replace(/-/g, "");
+        if(finalStr.trim()!=finallinkText.trim())  {
+          url = usingLocal?`http://localhost:3000/fetch/${linkText}`:`https://en.wiktionary.org/wiki/${finallinkText}`
           fetch(url).then(response => response.text())
           .then(html => {
             // Parse the returned HTML and extract the inflection table
