@@ -179,6 +179,7 @@ function quizStyle1() {
   console.log(options);
   for (let i = 0; i<3;i++) {    
     const randomIndex = Math.floor(Math.random() * filteredVocabList.length);
+    console.log(randomIndex,filteredVocabList)
     const randomDefinition = filteredVocabList[randomIndex].definition;
     if (!options.includes(randomDefinition)) {
       options.push(randomDefinition);
@@ -830,7 +831,7 @@ function adjustFontSize(){
     }
     if (result === 't'){
       currentQuizNo += 1;
-      removeCurrentVocab();
+      //removeCurrentVocab();
     }
   }
   

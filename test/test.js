@@ -305,7 +305,7 @@ function quizStyle1() {
     }
     if (result === 't'){
       currentQuizNo += 1;
-      removeCurrentVocab();
+      //removeCurrentVocab();
     }
   }
   
