@@ -2915,6 +2915,9 @@ export function setupSpellingQuiz(correctVocab, config = {}) {
   }
   if (hintButton) {
     hintButton.style.display = (!prompt.includes("Spell the word for")) ? 'inline-block' : 'none';
+    if (correctVocab.language && correctVocab.language != 'la') {
+      hintButton.style.display = 'none'
+    }
     hintButton.onclick = () => {
       if (!hintText || !spellingHintText) {
         return;

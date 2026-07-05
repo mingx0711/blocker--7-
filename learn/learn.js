@@ -515,12 +515,12 @@ async function generateLearningQueue(bookSelected) {
       quizTypes.push('quiz4');
     }
     if (utils.hasGender(wordObj)) {
+      console.log(wordObj.word + " has gender: " + wordObj.gender);
       quizTypes.push('quiz5');
     }
     if (utils.hasVerbFormSpelling(wordObj)) {
       quizTypes.push('quiz10');
     }
-    return ['quiz9', 'quiz10'];
     return quizTypes;
   }
 
@@ -530,7 +530,6 @@ async function generateLearningQueue(bookSelected) {
     const quizCounts = wordQuizTypeCounts[word] || {};
     const lowestUsage = Math.min(...eligibleQuizTypes.map(type => quizCounts[type] || 0));
     const leastUsedTypes = eligibleQuizTypes.filter(type => (quizCounts[type] || 0) === lowestUsage);
-
     return leastUsedTypes[Math.floor(Math.random() * leastUsedTypes.length)];
   }
 
@@ -550,7 +549,7 @@ async function generateLearningQueue(bookSelected) {
   function buildQuizQueueForBatch(batchWords) {
     const batchQuizQueue = [];
     const minimumQuizzesPerWord = 2;
-    const targetQuizCount = batchWords.length === 4 ? 10 : batchWords.length * minimumQuizzesPerWord;
+    const targetQuizCount = batchWords.length === 4 ? 6 : batchWords.length * minimumQuizzesPerWord;
 
     batchWords.forEach(wordObj => {
       for (let i = 0; i < minimumQuizzesPerWord; i++) {
