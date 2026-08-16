@@ -83,6 +83,125 @@ document.getElementById('closeSearchEditVocab').addEventListener('click', functi
   e.stopPropagation();
   closeSearchEditContainer();
 });
+
+const bulkSearchContainer = document.getElementById('bulkSearchVocabContainer');
+const bulkSearchMessage = document.getElementById('bulkSearchVocabMsg');
+
+function populateBulkSearchCollections() {
+  chrome.storage.local.get({ bookList: [], lastBook: '' }, ({ bookList, lastBook }) => {
+    const selector = document.getElementById('bulkSearchCollection');
+    selector.innerHTML = '';
+    (bookList || []).forEach(book => {
+      const option = document.createElement('option');
+      option.value = book;
+      option.textContent = book;
+      selector.appendChild(option);
+    });
+    if (lastBook && [...selector.options].some(option => option.value === lastBook)) {
+      selector.value = lastBook;
+    }
+  });
+}
+
+document.getElementById('bulkSearchVocabBtn').addEventListener('click', () => {
+  populateBulkSearchCollections();
+  bulkSearchContainer.style.display = 'block';
+  bulkSearchMessage.textContent = '';
+});
+
+document.getElementById('closeBulkSearchVocab').addEventListener('click', () => {
+  bulkSearchContainer.style.display = 'none';
+  bulkSearchMessage.textContent = '';
+});
+
+function normaliseBulkSearchWord(word, language) {
+  const cleaned = word.replace(/\(.*?\)/g, '').replace(/\/.*$/g, '').replace(/[!?]/g, '').trim();
+  return ['de', 'fr'].includes(language)
+    ? cleaned
+    : cleaned.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+async function fetchBulkSearchVocab(word, language, book) {
+  const lookupWord = normaliseBulkSearchWord(word, language);
+  if (!lookupWord) return null;
+
+  const response = await fetch(`https://en.wiktionary.org/wiki/${encodeURIComponent(lookupWord)}`);
+  if (!response.ok) return null;
+  const html = await response.text();
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  let vocab;
+  console.log('Fetching vocab for', lookupWord, 'in language', language, 'from book', book);
+  if (language === 'la') {
+    vocab = await utils.getLatinAttributes(doc, word, book);
+    if (vocab && vocab.vocabResult) vocab = vocab.vocabResult;
+  } else if (language === 'ja' || language === 'zh') {
+    vocab = await utils.getLinkedAttributes(doc, word, language, book);
+  } else {
+    vocab = await utils.getLinkedAttributes(doc, word, language, book);
+  }
+
+  if (!vocab || typeof vocab === 'string' || !vocab.word || !vocab.definition) return null;
+  if (language === 'zh') vocab.word = word;
+  vocab.book = book;
+  vocab.language = language;
+  return vocab;
+}
+
+document.getElementById('runBulkSearchVocab').addEventListener('click', async () => {
+  const button = document.getElementById('runBulkSearchVocab');
+  const words = [...new Set(document.getElementById('bulkSearchWords').value
+    .split(/[\r\n,]+/)
+    .map(word => word.trim())
+    .filter(Boolean))];
+  const language = document.getElementById('bulkSearchLanguage').value;
+  const book = document.getElementById('bulkSearchCollection').value;
+
+  if (!words.length) {
+    bulkSearchMessage.textContent = 'Paste at least one word to search.';
+    return;
+  }
+  if (!book) {
+    bulkSearchMessage.textContent = 'Choose a collection before searching.';
+    return;
+  }
+
+  button.disabled = true;
+  const failed = [];
+  const found = [];
+  try {
+    for (let index = 0; index < words.length; index += 1) {
+      const word = words[index];
+      bulkSearchMessage.textContent = `Searching ${index + 1} of ${words.length}: ${word}`;
+      try {
+        const vocab = await fetchBulkSearchVocab(word, language, book);
+        if (vocab) found.push(vocab);
+        else failed.push(word);
+      } catch (error) {
+        console.error('Bulk Wiktionary search failed for', word, error);
+        failed.push(word);
+      }
+    }
+
+    const { vocabList = [] } = await chrome.storage.local.get({ vocabList: [] });
+    const existingKeys = new Set(vocabList.map(item => `${item.word}|${item.language || ''}|${item.book || ''}`));
+    const additions = found.filter(item => {
+      const key = `${item.word}|${item.language}|${item.book}`;
+      if (existingKeys.has(key)) return false;
+      existingKeys.add(key);
+      return true;
+    });
+    await chrome.storage.local.set({ vocabList: [...vocabList, ...additions], lastBook: book });
+    refreshVocabList([...vocabList, ...additions]);
+
+    const skippedDuplicates = found.length - additions.length;
+    bulkSearchMessage.textContent = `Added ${additions.length} word${additions.length === 1 ? '' : 's'}.` +
+      (skippedDuplicates ? ` Skipped ${skippedDuplicates} duplicate${skippedDuplicates === 1 ? '' : 's'}.` : '') +
+      (failed.length ? ` Could not find: ${failed.join(', ')}` : '');
+  } finally {
+    button.disabled = false;
+  }
+});
+
 document.addEventListener('click', function (e) {
   if (e.target && e.target.id === 'closeSearchEditVocab') {
     e.preventDefault();
