@@ -1069,10 +1069,12 @@ function getGermanConjugationAttributes(doc) {
           valueCell?.querySelector('a')?.textContent?.trim() ||
           valueCell?.querySelector('strong')?.textContent?.trim() ||
           '';
+
         conjugation.past_participle = (firstLinkedForm || valueText)
           .replace(/\d+/g, '')
           .trim()
-          .split(/\s+/)[0];
+          .split(/\s+/).toString().replaceAll(",", " ");
+        console.log(conjugation.past_participle)
       }
 
       if (headerText === 'auxiliary') {
