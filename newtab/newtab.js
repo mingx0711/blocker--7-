@@ -372,6 +372,17 @@ document.addEventListener('DOMContentLoaded', function () {
       checkAnswer(button);
     });
   });
+  const spellingCheckButton = document.getElementById('checkButton');
+  const spellingAnswerInput = document.getElementById('answer');
+  if (spellingCheckButton && spellingAnswerInput) {
+    spellingCheckButton.addEventListener('click', checkSpelling);
+    spellingAnswerInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        checkSpelling();
+      }
+    });
+  }
   const intervalInput = document.getElementById('interval');
   intervalInput.addEventListener('input', (e) => {
     const parsed = parseInt(e.target.value, 10);
@@ -622,6 +633,8 @@ let timerId;
 const changeIntervalBtn = document.getElementById('changeInterval');
 const autoPlayBtn = document.getElementById('autoplayButton');
 function showNextItem(checkBooks = ["all"]) {
+  const spellingContainer = document.getElementById('SpellingContainer');
+  if (spellingContainer) spellingContainer.style.display = 'none';
 
   if (newtab) {
     //to avoid err
@@ -1126,7 +1139,7 @@ function snoozeCurrentVocab() {
   });
 }
 function showQuiz() {
-  const quizStyle = Math.floor(Math.random() * 11);
+  const quizStyle = Math.floor(Math.random() * 12);
   // //////console.log.log(quizStyle);
   switch (quizStyle) {
     case 0:
@@ -1162,7 +1175,62 @@ function showQuiz() {
     case 10:
       quizStyle8();
       break
+    case 11:
+      quizStyleGermanPhrase();
+      break
   }
+}
+
+function quizStyleGermanPhrase() {
+  utils.ClearPageForQuizContainer();
+  const eligibleVocab = vocabList.filter(entry => utils.hasGermanPhraseSpelling(entry));
+  if (eligibleVocab.length === 0) {
+    return quizStyle1();
+  }
+
+  const correctVocab = utils.getTestWord(eligibleVocab);
+  const quizData = utils.prepareGermanPhraseSpellingQuiz(correctVocab);
+  if (!quizData) {
+    return quizStyle1();
+  }
+
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = quizData.correctAnswer;
+  quizType = quizData.quizType;
+  currentLanguage = correctVocab.language || utils.convertToAbbr(correctVocab.book);
+  wordToSpeak = quizData.correctAnswer;
+  utils.setupSpellingQuiz(correctVocab, {
+    prompt: quizData.questionText,
+    correctAnswer: quizData.correctAnswer
+  });
+}
+
+function checkSpelling() {
+  const spellingContainer = document.getElementById('SpellingContainer');
+  const answerInput = document.getElementById('answer');
+  const rawCorrect = spellingContainer?.dataset.correctAnswer || '';
+  const inputValue = answerInput?.value || '';
+  const result = utils.normalizeSpelling(inputValue, currentLanguage) ===
+    utils.normalizeSpelling(rawCorrect, currentLanguage) ? 't' : 'f';
+  updateQuizResults(result, currentQuizWord);
+
+  utils.handleSpellingAnswer({
+    currentLanguage,
+    rawCorrect,
+    inputValue,
+    displayUserAnswer: inputValue,
+    speakWord: () => utils.speakWord(currentLanguage, wordToSpeak || currentQuizWord, latinMedieval),
+    onCorrect: showNextItem,
+    onIncorrect: () => {
+      document.getElementById('nextAfterIncorrectButton').style.display = 'block';
+    },
+    reviewState: {
+      currentQuizWord,
+      currentQuizDefinition,
+      quizType,
+      vocabList
+    }
+  });
 }
 function updateQuizResults(result, word) {
   // //////console.log.log(result,word)

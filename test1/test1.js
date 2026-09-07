@@ -206,12 +206,15 @@ function updateBookSpecificFocusOptions() {
   const selectedBook = document.getElementById('bookSelector').value;
   const inflectionLabel = document.getElementById('inflectionFocusOption');
   const verbFormSpellingLabel = document.getElementById('verbFormSpellingFocusOption');
+  const germanPhraseLabel = document.getElementById('germanPhraseFocusOption');
   const inflectionInput = inflectionLabel?.querySelector('input[name="focusOption"]');
   const verbFormSpellingInput = verbFormSpellingLabel?.querySelector('input[name="focusOption"]');
+  const germanPhraseInput = germanPhraseLabel?.querySelector('input[name="focusOption"]');
   const defaultOption = document.querySelector('input[name="focusOption"][value="none"]');
 
   const showInflection = selectedBook === 'Latin';
   const showVerbFormSpelling = selectedBook === 'German' || selectedBook === 'Latin';
+  const showGermanPhrase = selectedBook === 'German' || selectedBook === 'All collections';
 
   if (inflectionLabel) {
     inflectionLabel.style.display = showInflection ? 'inline-flex' : 'none';
@@ -219,10 +222,14 @@ function updateBookSpecificFocusOptions() {
   if (verbFormSpellingLabel) {
     verbFormSpellingLabel.style.display = showVerbFormSpelling ? 'inline-flex' : 'none';
   }
+  if (germanPhraseLabel) {
+    germanPhraseLabel.style.display = showGermanPhrase ? 'inline-flex' : 'none';
+  }
 
   const invalidSelection =
     (inflectionInput?.checked && !showInflection) ||
-    (verbFormSpellingInput?.checked && !showVerbFormSpelling);
+    (verbFormSpellingInput?.checked && !showVerbFormSpelling) ||
+    (germanPhraseInput?.checked && !showGermanPhrase);
 
   if (invalidSelection && defaultOption) {
     defaultOption.checked = true;
@@ -234,6 +241,7 @@ let focusQuizMap = {
   pronunciation: [quizStyle4],
   inflection: [quizStyle6, quizStyle7],
   verbFormSpelling: [quizStyle10],
+  germanPhraseSpelling: [quizStyle11],
   definition: [quizStyle1, quizStyle2, quizStyle3, quizStyle8],
   listeningMCQ: [quizStyle8],
 };
@@ -280,6 +288,12 @@ function displayTests(bookSelected) {
         filteredVocabList = filteredVocabList.filter(vocab => utils.hasVerbFormSpelling(vocab));
         if (filteredVocabList.length < 4) {
           alert("Not enough verbs with spelling-test conjugation data to make the test.");
+          return;
+        }
+      } else if (focus === "germanPhraseSpelling") {
+        filteredVocabList = filteredVocabList.filter(vocab => utils.hasGermanPhraseSpelling(vocab));
+        if (filteredVocabList.length < 4) {
+          alert("Not enough German phrase connections to make the test.");
           return;
         }
       } else if (focus === "listening") {
@@ -431,6 +445,7 @@ function showNextItem() {
   } else {
     document.getElementById('quizContainer').style.display = 'none';
     document.getElementById('trueFalseContainer').style.display = 'none';
+    document.getElementById('SpellingContainer').style.display = 'none';
 
     currentVocabIndex++;
     console.log("Current vocab index: " + currentVocabIndex + " / " + filteredVocabList.length);
@@ -446,6 +461,9 @@ function showNextItem() {
     }
 
     const currentVocab = filteredVocabList[currentVocabIndex];
+    if (utils.hasGermanPhraseSpelling(currentVocab)) {
+      allQuizStyles.push(quizStyle11);
+    }
     const redoQuizStyles = redoUsesLastWrongQuizType && currentVocab?.lastWrongQuizType
       ? focusQuizMap[currentVocab.lastWrongQuizType]
       : null;
@@ -765,6 +783,29 @@ function quizStyle10() {
     prompt: quizData.questionText,
     correctAnswer: currentQuizDefinition,
     hintText: quizData.hintText
+  });
+  currentTest = { quizStyle: quizData.testLabel, vocab: correctVocab.word, book: correctVocab.book };
+}
+function quizStyle11() {
+  currentQuizBucket = 'germanPhraseSpelling';
+  currentSpellingReview = null;
+  utils.ClearPageForQuizContainer();
+  utils.removeSnooze();
+
+  const correctVocab = filteredVocabList[currentVocabIndex];
+  const quizData = utils.prepareGermanPhraseSpellingQuiz(correctVocab);
+  if (!quizData) {
+    return quizStyle1();
+  }
+
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = quizData.correctAnswer;
+  quizType = quizData.quizType;
+  currentLanguage = correctVocab.language || utils.convertToAbbr(correctVocab.book);
+  wordToSpeak = quizData.correctAnswer;
+  utils.setupSpellingQuiz(correctVocab, {
+    prompt: quizData.questionText,
+    correctAnswer: quizData.correctAnswer
   });
   currentTest = { quizStyle: quizData.testLabel, vocab: correctVocab.word, book: correctVocab.book };
 }

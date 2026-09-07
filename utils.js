@@ -1117,8 +1117,9 @@ export async function getEasyAttributes(doc, word, lang, book) {
     const grannyElement = isWord.parentElement.parentElement;
     const closestOl = grannyElement.nextElementSibling;
     var usage;
-    const liElement = closestOl.querySelector("li");
-    let liElementCopy = liElement.cloneNode(true);
+    const firstListItem = closestOl?.querySelector("li") || null;
+    const liElement = getPreferredDefinitionListItem(isWord, firstListItem);
+    let liElementCopy = liElement?.cloneNode(true);
     if (liElement) {
       if (liElement.querySelector('div.h-usage-example') || liElement.querySelector('span.h-usage-example.collocation')) {
         usage = liElementCopy.querySelector('div.h-usage-example') || liElementCopy.querySelector('span.h-usage-example.collocation');
@@ -1394,6 +1395,41 @@ function extractFromZhusexDl(zhusexDl) {
     .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function isFormOfDefinition(listItem) {
+  if (!listItem) return false;
+  if (listItem.querySelector('.form-of-definition, .form-of-definition-link')) {
+    return true;
+  }
+  return /\b(?:inflection|form|past participle|present participle) of\b/i.test(
+    listItem.textContent || ''
+  );
+}
+
+function getPreferredDefinitionListItem(headwordElement, fallbackListItem) {
+  if (!headwordElement) return fallbackListItem;
+
+  const headings = Array.from(headwordElement.ownerDocument.querySelectorAll('h2'));
+  const nextLanguageHeading = headings.find(heading =>
+    headwordElement.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING
+  );
+  const lists = Array.from(headwordElement.ownerDocument.querySelectorAll('ol'))
+    .filter(list => {
+      if (!(headwordElement.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+        return false;
+      }
+      if (nextLanguageHeading &&
+        !(list.compareDocumentPosition(nextLanguageHeading) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+        return false;
+      }
+      return !list.parentElement?.closest('ol');
+    });
+
+  const definitionItems = lists
+    .flatMap(list => Array.from(list.children))
+    .filter(item => item.tagName === 'LI');
+  return definitionItems.find(item => !isFormOfDefinition(item)) || fallbackListItem;
 }
 
 function getRandomNumber(min, max) {
@@ -2176,6 +2212,47 @@ export function hasVerbFormSpelling(vocab) {
   return hasGermanPerfekt(vocab) || hasLatinConjugationSpelling(vocab);
 }
 
+const GERMAN_PHRASE_CONNECTORS = new Set([
+  'ab', 'an', 'auf', 'aus', 'bei', 'durch', 'für', 'gegen', 'hinter', 'in',
+  'mit', 'nach', 'neben', 'ohne', 'seit', 'über', 'um', 'unter', 'vor',
+  'von', 'zu', 'zwischen', 'am', 'ans', 'beim', 'im', 'ins', 'vom', 'zum',
+  'zur', 'als', 'auch', 'dass', 'denn', 'oder', 'sich', 'etwas', 'nichts',
+  'jemand', 'niemand'
+]);
+
+function isGermanVocab(vocab) {
+  return (vocab?.language || '').toLowerCase() === LANGUAGES.GERMAN ||
+    (vocab?.book || '').toLowerCase() === 'german';
+}
+
+export function hasGermanPhraseSpelling(vocab) {
+  if (!isGermanVocab(vocab)) return false;
+
+  const words = String(vocab?.word || '').trim().split(/\s+/);
+  return words.length >= 2 && words.some(word =>
+    GERMAN_PHRASE_CONNECTORS.has(word.toLowerCase().replace(/^[^\p{L}]+|[^\p{L}]+$/gu, ''))
+  );
+}
+
+export function prepareGermanPhraseSpellingQuiz(correctVocab) {
+  if (!hasGermanPhraseSpelling(correctVocab)) return null;
+
+  const words = String(correctVocab.word).trim().split(/\s+/);
+  const connectorIndex = words.findIndex(word =>
+    GERMAN_PHRASE_CONNECTORS.has(word.toLowerCase().replace(/^[^\p{L}]+|[^\p{L}]+$/gu, ''))
+  );
+  if (connectorIndex === -1) return null;
+
+  const correctAnswer = words[connectorIndex];
+  const phraseWithBlank = words.map((word, index) => index === connectorIndex ? '___' : word).join(' ');
+  return {
+    correctAnswer,
+    questionText: `Fill in the blank: <br><b>${escapeHtml(correctVocab.definition)}<br></b>: ${escapeHtml(phraseWithBlank)}`,
+    quizType: 'germanPhraseSpelling',
+    testLabel: 'German Phrase Spelling'
+  };
+}
+
 export function prepareVerbFormSpellingQuiz(correctVocab) {
   if (hasGermanPerfekt(correctVocab)) {
     const germanQuiz = prepareGermanPerfektQuiz(correctVocab);
@@ -2940,6 +3017,9 @@ export function normalizeSpelling(value, language = null) {
       value = value.replaceAll("oe", "ö");
       value = value.replaceAll("ae", "ä");
       value = value.replaceAll("ue", "ü");
+      value = value.replaceAll("(", "");
+      value = value.replaceAll(")", "");
+
       return value.trim().toLowerCase();
   }
   return (value || "").trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');

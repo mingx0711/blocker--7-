@@ -521,6 +521,9 @@ async function generateLearningQueue(bookSelected) {
     if (utils.hasVerbFormSpelling(wordObj)) {
       quizTypes.push('quiz10');
     }
+    if (utils.hasGermanPhraseSpelling(wordObj)) {
+      quizTypes.push('quiz11');
+    }
     return quizTypes;
   }
 
@@ -687,6 +690,9 @@ function showNextLearningStep() {
       break;
     case "quiz10":
       quizStyle10()
+      break;
+    case "quiz11":
+      quizStyle11()
       break;
     case "flashcard":
       showNextVocab()
@@ -1108,6 +1114,25 @@ function quizStyle10() {
     prompt: quizData.questionText,
     correctAnswer: currentQuizDefinition,
     hintText: quizData.hintText
+  });
+  currentTest = { quizStyle: quizData.testLabel, vocab: correctVocab.word, book: correctVocab.book };
+}
+function quizStyle11() {
+  currentSpellingReview = null;
+  shouldSpeak = true;
+  const correctVocab = learningQueue[currentStep].word;
+  const quizData = utils.prepareGermanPhraseSpellingQuiz(correctVocab);
+  if (!quizData) {
+    return quizStyle9();
+  }
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = quizData.correctAnswer;
+  quizType = quizData.quizType;
+  currentLanguage = correctVocab.language || utils.convertToAbbr(correctVocab.book);
+  wordToSpeak = quizData.correctAnswer;
+  utils.setupSpellingQuiz(correctVocab, {
+    prompt: quizData.questionText,
+    correctAnswer: quizData.correctAnswer
   });
   currentTest = { quizStyle: quizData.testLabel, vocab: correctVocab.word, book: correctVocab.book };
 }
