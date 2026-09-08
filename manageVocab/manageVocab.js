@@ -1,6 +1,6 @@
 // document.getElementById('addVocabForm').addEventListener('submit', function(e) {
 //   e.preventDefault();
-import * as utils from '../utils.js';
+import * as utils from '../utils/index.js';
 
 chrome.storage.sync.getBytesInUse(null, function (bytesInUse) {
   console.log('Sync storage used: ' + bytesInUse + ' bytes');

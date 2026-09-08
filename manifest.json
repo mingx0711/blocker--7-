@@ -25,6 +25,7 @@
     "service_worker": "background.js"
   },
   "host_permissions": [
-    "https://en.wiktionary.org/*"
+    "https://en.wiktionary.org/*",
+    "https://translation.googleapis.com/*"
   ]
 }

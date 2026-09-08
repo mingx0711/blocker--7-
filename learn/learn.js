@@ -1,4 +1,5 @@
-import * as utils from '../utils.js';
+import * as utils from '../utils/index.js';
+import { QUIZ_TYPES } from '../utils/quiz.js';
 let currentVocabIndex = null;
 let vocabList = [];
 let firstbook = "";
@@ -509,26 +510,32 @@ async function generateLearningQueue(bookSelected) {
   }
 
   function getEligibleQuizTypes(wordObj) {
-    const quizTypes = ['quiz1', 'quiz2', 'quiz3', 'quiz8', 'quiz9'];
+    const quizTypes = [
+      QUIZ_TYPES.DEFINITION,
+      QUIZ_TYPES.WORD,
+      QUIZ_TYPES.TRUE_FALSE_DEFINITION,
+      QUIZ_TYPES.LISTENING,
+      QUIZ_TYPES.SPELLING
+    ];
 
     if (utils.hasPronounciation(wordObj)) {
-      quizTypes.push('quiz4');
+      quizTypes.push(QUIZ_TYPES.PRONUNCIATION);
     }
     if (utils.hasGender(wordObj)) {
       console.log(wordObj.word + " has gender: " + wordObj.gender);
-      quizTypes.push('quiz5');
+      quizTypes.push(QUIZ_TYPES.GENDER);
     }
     if (utils.hasVerbFormSpelling(wordObj)) {
-      quizTypes.push('quiz10');
+      quizTypes.push(QUIZ_TYPES.VERB_FORM_SPELLING);
     }
     if (utils.hasGermanPhraseSpelling(wordObj)) {
-      quizTypes.push('quiz11');
+      quizTypes.push(QUIZ_TYPES.GERMAN_PHRASE_SPELLING);
     }
     if (utils.hasReflexive(wordObj)) {
-      quizTypes.push('quiz12');
+      quizTypes.push(QUIZ_TYPES.REFLEXIVE);
     }
     if (utils.hasFixedConnection(wordObj)) {
-      quizTypes.push('quiz13');
+      quizTypes.push(QUIZ_TYPES.FIXED_CONNECTION);
     }
     return quizTypes;
   }
@@ -544,8 +551,8 @@ async function generateLearningQueue(bookSelected) {
     };
 
     const selectedType = pickLeastUsedType(eligibleQuizTypes);
-    if (selectedType === 'quiz12' && eligibleQuizTypes.length > 1 && Math.random() < 0.5) {
-      return pickLeastUsedType(eligibleQuizTypes.filter(type => type !== 'quiz12'));
+    if (selectedType === QUIZ_TYPES.REFLEXIVE && eligibleQuizTypes.length > 1 && Math.random() < 0.5) {
+      return pickLeastUsedType(eligibleQuizTypes.filter(type => type !== QUIZ_TYPES.REFLEXIVE));
     }
     return selectedType;
   }
@@ -570,7 +577,7 @@ async function generateLearningQueue(bookSelected) {
 
     batchWords.forEach(wordObj => {
       if (utils.hasFixedConnection(wordObj)) {
-        addQuizToQueue(batchQuizQueue, 'quiz13', wordObj);
+        addQuizToQueue(batchQuizQueue, QUIZ_TYPES.FIXED_CONNECTION, wordObj);
       }
       const remainingQuizzes = utils.hasFixedConnection(wordObj) ? minimumQuizzesPerWord - 1 : minimumQuizzesPerWord;
       for (let i = 0; i < remainingQuizzes; i++) {
@@ -600,7 +607,7 @@ async function generateLearningQueue(bookSelected) {
 
     words.forEach(wordObj => {
       if (utils.hasFixedConnection(wordObj)) {
-        addQuizToQueue(finalQuizQueue, 'quiz13', wordObj);
+        addQuizToQueue(finalQuizQueue, QUIZ_TYPES.FIXED_CONNECTION, wordObj);
       }
       const remainingQuizzes = utils.hasFixedConnection(wordObj) ? 1 : 2;
       for (let i = 0; i < remainingQuizzes; i++) {
@@ -678,48 +685,48 @@ function showNextLearningStep() {
   }
   const step = learningQueue[currentStep];
   switch (step.type) {
-    case "quiz1":
+    case QUIZ_TYPES.DEFINITION:
       quizStyle1()
       break;
 
-    case "quiz2":
+    case QUIZ_TYPES.WORD:
       quizStyle2()
       break;
 
-    case "quiz3":
+    case QUIZ_TYPES.TRUE_FALSE_DEFINITION:
       quizStyle3()
       break;
 
-    case "quiz5":
+    case QUIZ_TYPES.GENDER:
       quizStyle5()
       break;
 
-    case "quiz4":
+    case QUIZ_TYPES.PRONUNCIATION:
       quizStyle4()
       break;
 
-    case "quiz6":
+    case QUIZ_TYPES.INFLECTION:
       quizStyle6()
       break;
-    case "quiz7":
+    case QUIZ_TYPES.GROUP:
       quizStyle7()
       break;
-    case "quiz8":
+    case QUIZ_TYPES.LISTENING:
       quizStyle8()
       break;
-    case "quiz9":
+    case QUIZ_TYPES.SPELLING:
       quizStyle9()
       break;
-    case "quiz10":
+    case QUIZ_TYPES.VERB_FORM_SPELLING:
       quizStyle10()
       break;
-    case "quiz11":
+    case QUIZ_TYPES.GERMAN_PHRASE_SPELLING:
       quizStyle11()
       break;
-    case "quiz12":
+    case QUIZ_TYPES.REFLEXIVE:
       quizStyle12()
       break;
-    case "quiz13":
+    case QUIZ_TYPES.FIXED_CONNECTION:
       quizStyle13()
       break;
     case "flashcard":
@@ -982,13 +989,13 @@ function quizStyle4() {
 
   currentQuizDefinition = correctVocab.pronounciation;
   if (currentQuizDefinition == "") {
-    if (learningQueue[currentStep - 1].type === 'quiz2') {
+    if (learningQueue[currentStep - 1].type === QUIZ_TYPES.WORD) {
       quizStyle1();
       return;
-    } else if (learningQueue[currentStep - 1].type === 'quiz1') {
+    } else if (learningQueue[currentStep - 1].type === QUIZ_TYPES.DEFINITION) {
       quizStyle3();
       return;
-    } else if (learningQueue[currentStep - 1].type === 'quiz3') {
+    } else if (learningQueue[currentStep - 1].type === QUIZ_TYPES.TRUE_FALSE_DEFINITION) {
       quizStyle2();
       return;
     } else {
@@ -1008,13 +1015,13 @@ function quizStyle5() {
   const correctVocab = learningQueue[currentStep].word;
   shouldSpeak = false;
   if (!utils.checkEligible(correctVocab, utils.hasGender, false)) {
-    if (learningQueue[currentStep - 1].type === 'quiz2') {
+    if (learningQueue[currentStep - 1].type === QUIZ_TYPES.WORD) {
       quizStyle1();
       return;
-    } else if (learningQueue[currentStep - 1].type === 'quiz1') {
+    } else if (learningQueue[currentStep - 1].type === QUIZ_TYPES.DEFINITION) {
       quizStyle3();
       return;
-    } else if (learningQueue[currentStep - 1].type === 'quiz3') {
+    } else if (learningQueue[currentStep - 1].type === QUIZ_TYPES.TRUE_FALSE_DEFINITION) {
       quizStyle2();
       return;
     } else {

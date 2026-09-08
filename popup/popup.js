@@ -1,8 +1,8 @@
 let vocab = {}
 let def;
 let wordSearched;
-import { GenderType, LANGUAGES } from '../utils.js';
-import * as utils from '../utils.js';
+import { GenderType, LANGUAGES } from '../utils/index.js';
+import * as utils from '../utils/index.js';
 chrome.runtime.onInstalled.addListener(function () {
   chrome.tabs.create({ url: "https://mingx0711.github.io/" });
 });
@@ -67,7 +67,12 @@ document.getElementById('addVocabForm').addEventListener('submit', function (e) 
     }
     var url = usingLocal ? `http://localhost:3000/fetch/${word}` : `https://en.wiktionary.org/wiki/${word}`
     fetch(url)
-      .then(response => response.text())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Wiktionary request failed with status ${response.status}`);
+        }
+        return response.text();
+      })
       .then(html => {
         // Parse the returned HTML and extract the inflection table
         const parser = new DOMParser();
@@ -80,6 +85,22 @@ document.getElementById('addVocabForm').addEventListener('submit', function (e) 
           getLinkedAttributes(doc, word, language);
         }
       })
+      .catch(async () => {
+        console.log("Error fetching from Wiktionary, trying Google Translate API...");
+        vocab = await utils.getGoogleTranslationVocab(word, language, book);
+        console.log(vocab)
+        if (typeof vocab === 'string') {
+          document.getElementById('vocabInfoInfInfs').style.display = 'block';
+          document.getElementById('addAuto').style.display = 'none';
+          document.getElementById('vocabInfo').style.display = 'block';
+          document.getElementById('vocabInfo').innerHTML = utils.invalidWord;
+          return;
+        }
+        document.getElementById('vocabInfo').innerHTML =
+          `word: <span style="font-weight: bold;">${vocab.word}</span><br>\n definition: <span style="font-weight: bold;">${vocab.definition}</span>`;
+        document.getElementById('vocabInfoInfInfs').style.display = 'block';
+        document.getElementById('addAuto').style.display = 'block';
+      });
     updateLanguageList(language);
   }
   populateBookSelector();
@@ -124,6 +145,9 @@ async function getLatinAttributes(doc, word) {
     vocab = vocabResult
   }
   if (typeof vocab === 'string') {
+    vocab = await utils.getGoogleTranslationVocab(word, 'la', book);
+  }
+  if (typeof vocab === 'string') {
     document.getElementById("vocabInfoInfInfs").style.display = 'block'
     document.getElementById('addAuto').style.display = 'none'
     document.getElementById('vocabInfo').style.display = 'block'
@@ -159,6 +183,9 @@ async function getLinkedAttributes(doc, word, lang) {
   const wordSearched = word;
   vocab = await utils.getLinkedAttributes(doc, word, lang, book)
   console.log(vocab)
+  if (typeof vocab === 'string') {
+    vocab = await utils.getGoogleTranslationVocab(wordSearched, lang, book);
+  }
   if (typeof vocab === 'string') {
     document.getElementById("vocabInfoInfInfs").style.display = 'block'
     document.getElementById('addAuto').style.display = 'none'
@@ -202,6 +229,18 @@ async function getEasyAttributes(doc, word, lang) {
   const book = document.getElementById('bookSelector').value;
   // Call the shared utils function
   vocab = await utils.getEasyAttributes(doc, word, lang, book);
+
+  if (typeof vocab === 'string') {
+    vocab = await utils.getGoogleTranslationVocab(word, lang, book);
+  }
+
+  if (typeof vocab === 'string') {
+    document.getElementById('vocabInfoInfInfs').style.display = 'block';
+    document.getElementById('addAuto').style.display = 'none';
+    document.getElementById('vocabInfo').style.display = 'block';
+    document.getElementById('vocabInfo').innerHTML = utils.invalidWord;
+    return;
+  }
 
   // Display vocab info in popup
   const vocabInfo = document.getElementById('vocabInfo');
@@ -339,6 +378,62 @@ function getSpanishVerbInflections(doc) {
 document.getElementById('manageButton').addEventListener('click', function () {
   chrome.tabs.create({ url: 'manageVocab/manageVocab.html' });
 });
+document.getElementById('googleApiKeyButton').addEventListener('click', async function () {
+  const panel = document.getElementById('googleApiKeyPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  if (panel.style.display === 'block') {
+    await renderGoogleApiKeyPanel();
+  }
+});
+async function renderGoogleApiKeyPanel() {
+  const result = await chrome.storage.local.get('googleTranslateApiKey');
+  const hasKey = Boolean(result.googleTranslateApiKey);
+  document.getElementById('googleApiKeyInput').style.display = hasKey ? 'none' : '';
+  document.getElementById('saveGoogleApiKey').style.display = hasKey ? 'none' : '';
+  document.getElementById('googleApiKeyStatus').textContent = hasKey
+    ? 'A key is saved locally.'
+    : 'No key saved.';
+}
+document.getElementById('saveGoogleApiKey').addEventListener('click', async function () {
+  const input = document.getElementById('googleApiKeyInput');
+  const status = document.getElementById('googleApiKeyStatus');
+  const apiKey = input.value.trim();
+  if (!apiKey) {
+    status.textContent = 'Enter an API key first.';
+    return;
+  }
+  await chrome.storage.local.set({ googleTranslateApiKey: apiKey });
+  input.value = '';
+  await renderGoogleApiKeyPanel();
+});
+document.getElementById('clearGoogleApiKey').addEventListener('click', async function () {
+  await chrome.storage.local.remove('googleTranslateApiKey');
+  document.getElementById('googleApiKeyInput').value = '';
+  await renderGoogleApiKeyPanel();
+});
+function setAutoSearchFieldsVisible(isVisible) {
+  document.getElementById('addVocabForm').classList.toggle('auto-search', !isVisible);
+}
+function initializeAutoSearchMode() {
+  const control = document.getElementById('autoSearchMode');
+  control.disabled = true;
+  chrome.storage.local.get({ autoSearchMode: false }, result => {
+    const autoSearchMode = result.autoSearchMode === true;
+    control.checked = autoSearchMode;
+    setAutoSearchFieldsVisible(!autoSearchMode);
+    control.disabled = false;
+  });
+}
+document.getElementById('autoSearchMode').addEventListener('change', async function () {
+  await chrome.storage.local.set({ autoSearchMode: this.checked });
+  if (this.checked) {
+    document.getElementById('definition').value = '';
+    document.getElementById('gender').value = '';
+    document.getElementById('pronounciation').value = '';
+  }
+  setAutoSearchFieldsVisible(!this.checked);
+});
+initializeAutoSearchMode();
 function formatLanguage(str) {
   switch (str) {
     case "la":

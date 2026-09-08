@@ -566,6 +566,80 @@ function getRandomKeys(obj, count) {
   }
   return selectedKeys;
 }
+
+const GOOGLE_TRANSLATE_LANGUAGE_CODES = Object.freeze({
+  latin: 'la',
+  la: 'la',
+  german: 'de',
+  de: 'de',
+  french: 'fr',
+  fr: 'fr',
+  spanish: 'es',
+  es: 'es',
+  italian: 'it',
+  it: 'it',
+  chinese: 'zh',
+  zh: 'zh-CN',
+  japanese: 'ja',
+  ja: 'ja',
+  korean: 'ko',
+  ko: 'ko',
+  portuguese: 'pt',
+  pt: 'pt',
+  russian: 'ru',
+  ru: 'ru'
+});
+
+async function getGoogleTranslateApiKey() {
+  if (typeof chrome === 'undefined' || !chrome.storage?.local) return '';
+  const result = await chrome.storage.local.get('googleTranslateApiKey');
+  return String(result.googleTranslateApiKey || '').trim();
+}
+
+export async function getGoogleTranslationVocab(word, language, book) {
+  const apiKey = await getGoogleTranslateApiKey();
+  const source = GOOGLE_TRANSLATE_LANGUAGE_CODES[String(language || '').toLowerCase()];
+  if (!apiKey || !source || !word) return 'invalid';
+
+  try {
+    const translationUrl = new URL('https://translation.googleapis.com/language/translate/v2');
+    translationUrl.searchParams.set('key', apiKey);
+    translationUrl.searchParams.set('target', 'en');
+    translationUrl.searchParams.set('source', source);
+    translationUrl.searchParams.set('q', word);
+    const response = await fetch(
+      translationUrl,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: word, source, target: 'en', format: 'text' })
+      }
+    );
+    if (!response.ok) return 'invalid';
+
+    const data = await response.json();
+    const definition = data?.data?.translations?.[0]?.translatedText?.trim();
+    if (!definition) return 'invalid';
+
+    const vocab = {
+      word,
+      definition,
+      snoozed: false,
+      book,
+      gender: '',
+      pronounciation: '',
+      language: source,
+      hasChecked: true,
+      seen: 0,
+      quizResults: ['n', 'n', 'n', 'n']
+    };
+    addType(vocab);
+    return vocab;
+  } catch (error) {
+    console.warn('Google Translation fallback failed:', error);
+    return 'invalid';
+  }
+}
 export async function getLatinAttributes(doc, word, book) {
   let conjugations = {};
   let verbInflectionTable;
@@ -2730,7 +2804,7 @@ export function detectLanguage(filteredVocabList) {
   }
 
   // Otherwise fallback
-  return utils.nameToAbbr[filteredVocabList[0].book];
+  return nameToAbbr[filteredVocabList[0].book];
 }
 export function setUp8Quiz(correctVocab, eligibleVocab, medievalLatin = false) {
   // Add to the .quiz-container

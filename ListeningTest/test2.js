@@ -1,4 +1,4 @@
-import * as utils from '../utils.js';
+import * as utils from '../utils/index.js';
 let currentVocabIndex = null;
 let vocabList = [];
 let currentQuizWord = null;

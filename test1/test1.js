@@ -1,5 +1,5 @@
-import { hasGender, hasPronounciation, LanguageGenderMap } from '../utils.js';
-import * as utils from '../utils.js';
+import { hasGender, hasPronounciation, LanguageGenderMap } from '../utils/index.js';
+import * as utils from '../utils/index.js';
 let currentVocabIndex = -1;
 let vocabList = [];
 let currentQuizWord = null;

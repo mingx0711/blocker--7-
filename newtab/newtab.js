@@ -1,5 +1,5 @@
-import * as utils from '../utils.js';
-import { GenderType, LANGUAGES } from '../utils.js';
+import * as utils from '../utils/index.js';
+import { GenderType, LANGUAGES } from '../utils/index.js';
 const fetchTip = document.getElementById('fetchTip');
 const fetchInfo = document.getElementById('fetchInfo');
 let conjToTest = [];
