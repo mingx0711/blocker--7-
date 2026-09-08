@@ -464,12 +464,21 @@ function showNextItem() {
     if (utils.hasGermanPhraseSpelling(currentVocab)) {
       allQuizStyles.push(quizStyle11);
     }
+    if (utils.hasReflexive(currentVocab)) {
+      allQuizStyles.push(quizStyle12);
+    }
+    if (utils.hasFixedConnection(currentVocab)) {
+      allQuizStyles.push(quizStyle13);
+    }
     const redoQuizStyles = redoUsesLastWrongQuizType && currentVocab?.lastWrongQuizType
       ? focusQuizMap[currentVocab.lastWrongQuizType]
       : null;
     const quizStyles = redoQuizStyles?.length ? redoQuizStyles : getQuizStylesForCurrentWord(allQuizStyles);
-    const randomIndex = Math.floor(Math.random() * quizStyles.length);
-    quizStyles[randomIndex]();
+    const availableQuizStyles = quizStyles.length > 1 && Math.random() < 0.5
+      ? quizStyles.filter(style => style !== quizStyle12)
+      : quizStyles;
+    const randomIndex = Math.floor(Math.random() * availableQuizStyles.length);
+    availableQuizStyles[randomIndex]();
   }
 }
 
@@ -802,6 +811,40 @@ function quizStyle11() {
   currentQuizDefinition = quizData.correctAnswer;
   quizType = quizData.quizType;
   currentLanguage = correctVocab.language || utils.convertToAbbr(correctVocab.book);
+  wordToSpeak = quizData.correctAnswer;
+  utils.setupSpellingQuiz(correctVocab, {
+    prompt: quizData.questionText,
+    correctAnswer: quizData.correctAnswer
+  });
+  currentTest = { quizStyle: quizData.testLabel, vocab: correctVocab.word, book: correctVocab.book };
+}
+function quizStyle12() {
+  currentQuizBucket = 'reflexive';
+  utils.ClearPageForQuizContainer();
+  utils.removeSnooze();
+  const correctVocab = filteredVocabList[currentVocabIndex];
+  if (!utils.hasReflexive(correctVocab)) return showNextItem();
+
+  const isReflexive = utils.isReflexive(correctVocab);
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = isReflexive ? 'reflexive' : 'not reflexive';
+  quizType = 'reflexive';
+  isPairCorrect = isReflexive;
+  utils.setupTFQuiz(correctVocab, currentQuizWord, currentQuizDefinition, `Is "${correctVocab.word}" reflexive?`);
+  currentTest = { quizStyle: 'Ask if reflexive', vocab: correctVocab.word, book: correctVocab.book };
+}
+function quizStyle13() {
+  currentQuizBucket = 'fixedConnectionSpelling';
+  currentSpellingReview = null;
+  utils.ClearPageForQuizContainer();
+  utils.removeSnooze();
+  const correctVocab = filteredVocabList[currentVocabIndex];
+  const quizData = utils.prepareFixedConnectionSpellingQuiz(correctVocab);
+  if (!quizData) return quizStyle1();
+
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = quizData.correctAnswer;
+  quizType = quizData.quizType;
   wordToSpeak = quizData.correctAnswer;
   utils.setupSpellingQuiz(correctVocab, {
     prompt: quizData.questionText,

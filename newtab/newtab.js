@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     vocab.hasChecked = true;
-    console.log(vocab.word, vocab.conjugations.group)
+    console.log(vocab)
     vocabList = vocabList.map(item =>
       item.word === vocab.word
         ? vocab
@@ -993,6 +993,18 @@ function showNextVocab(collection = currentCollectionSelection) {
               infoDiv.textContent = "group:" + currentCollection[currentVocabIndex].conjugations.group
             }
         }
+      }
+      const flashcardGrammar = [];
+      if (utils.isReflexive(currentCollection[currentVocabIndex])) {
+        flashcardGrammar.push('reflexive');
+      }
+      if (utils.hasFixedConnection(currentCollection[currentVocabIndex])) {
+        flashcardGrammar.push(`used with: ${currentCollection[currentVocabIndex].fixedConnections[0]}`);
+      }
+      if (flashcardGrammar.length > 0) {
+        infoDivTwo.textContent = [infoDivTwo.textContent, ...flashcardGrammar]
+          .filter(Boolean)
+          .join(' | ');
       }
       if (currentCollection[currentVocabIndex].etym) {
         const etymText = utils.chopEtym(currentCollection[currentVocabIndex].etym);

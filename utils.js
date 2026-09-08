@@ -1119,6 +1119,8 @@ export async function getEasyAttributes(doc, word, lang, book) {
     var usage;
     const firstListItem = closestOl?.querySelector("li") || null;
     const liElement = getPreferredDefinitionListItem(isWord, firstListItem);
+    const grammar = getDefinitionGrammar(liElement);
+    const fixedConnections = getFixedConnections(liElement, lang);
     let liElementCopy = liElement?.cloneNode(true);
     if (liElement) {
       if (liElement.querySelector('div.h-usage-example') || liElement.querySelector('span.h-usage-example.collocation')) {
@@ -1239,11 +1241,11 @@ export async function getEasyAttributes(doc, word, lang, book) {
       }
     }
     const germanConjugation = lang === 'de' ? getGermanConjugationAttributes(doc) : null;
-    let vocab = { word, definition, snoozed: false, book, language: lang, pronounciation: pronounciationText, gender: autoGender ? autoGender : gender, hasChecked: true, seen: 0, quizResults: ['n', 'n', 'n', 'n'], etym: hasEytm ? etym : "", usage: usage ? usage : "" }
+    let vocab = { word, definition, snoozed: false, book, language: lang, pronounciation: pronounciationText, gender: autoGender ? autoGender : gender, grammar, fixedConnections, hasChecked: true, seen: 0, quizResults: ['n', 'n', 'n', 'n'], etym: hasEytm ? etym : "", usage: usage ? usage : "" }
     if (germanConjugation) {
       vocab.conjugation = germanConjugation;
     }
-    console.log(vocab.word, vocab.conjugation ? vocab.conjugation : "no conjugation");
+    console.log(vocab.grammar ? vocab.grammar : "no grammar", vocab.fixedConnections ? vocab.fixedConnections : "no fixed connections");
     addType(vocab);
     return vocab;
   } else {
@@ -1405,6 +1407,40 @@ function isFormOfDefinition(listItem) {
   return /\b(?:inflection|form|past participle|present participle) of\b/i.test(
     listItem.textContent || ''
   );
+}
+
+function getDefinitionGrammar(listItem) {
+  if (!listItem) return [];
+
+  const labels = Array.from(listItem.querySelectorAll(
+    '.usage-label-sense, .usage-label:not(.object-usage-tag)'
+  ));
+  const grammar = [];
+  labels.forEach(label => {
+    const text = label.textContent
+      .replace(/[()[\]]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    text.split(',').map(part => part.trim()).filter(Boolean).forEach(part => {
+      if (!grammar.includes(part)) grammar.push(part);
+    });
+  });
+  return grammar;
+}
+
+function getFixedConnections(listItem, language) {
+  if (!listItem) return [];
+
+  const connections = [];
+  listItem.querySelectorAll('.object-usage-tag').forEach(objectTag => {
+    const candidates = Array.from(listItem.querySelectorAll(`[lang="${language}"] a`))
+      .filter(anchor => objectTag.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_PRECEDING);
+    const connection = candidates.at(-1)?.textContent.trim();
+    if (connection && !connections.includes(connection)) {
+      connections.push(connection);
+    }
+  });
+  return connections;
 }
 
 function getPreferredDefinitionListItem(headwordElement, fallbackListItem) {
@@ -2234,6 +2270,32 @@ export function hasGermanPhraseSpelling(vocab) {
   );
 }
 
+export function hasReflexive(vocab) {
+  return vocab != null && Object.prototype.hasOwnProperty.call(vocab, 'reflexive');
+}
+
+export function isReflexive(vocab) {
+  const value = vocab?.reflexive;
+  return value === true || ['true', 'yes', 'ja', 'y', '1'].includes(String(value).toLowerCase());
+}
+
+export function hasFixedConnection(vocab) {
+  return Array.isArray(vocab?.fixedConnections) && vocab.fixedConnections.length > 0 &&
+    String(vocab.fixedConnections[0]).trim().length > 0;
+}
+
+export function prepareFixedConnectionSpellingQuiz(correctVocab) {
+  if (!hasFixedConnection(correctVocab)) return null;
+
+  const connection = String(correctVocab.fixedConnections[0]).trim();
+  return {
+    correctAnswer: connection,
+    questionText: `Fill in the blank: <br><b>${escapeHtml(correctVocab.definition)}<br></b>: ${escapeHtml(correctVocab.word)} is usually used with _____`,
+    quizType: 'fixedConnectionSpelling',
+    testLabel: 'Fixed Connection Spelling'
+  };
+}
+
 export function prepareGermanPhraseSpellingQuiz(correctVocab) {
   if (!hasGermanPhraseSpelling(correctVocab)) return null;
 
@@ -2590,9 +2652,9 @@ export function getEligibleVocabs(vocabList, func = () => false, needSeen = fals
   });
   return eligibleVocab;
 }
-export function setupTFQuiz(correctVocab, currentQuizWord, currentQuizDefinition) {
-  document.getElementById('quizQuestion').textContent = `What is the definition of \r\n "${correctVocab.word}"?`;
-  document.getElementById('trueFalseQuestion').textContent = `Is "${currentQuizWord}" \r\n "${currentQuizDefinition}"?`;
+export function setupTFQuiz(correctVocab, currentQuizWord, currentQuizDefinition, questionText = null) {
+  document.getElementById('quizQuestion').textContent = questionText || `What is the definition of \r\n "${correctVocab.word}"?`;
+  document.getElementById('trueFalseQuestion').textContent = questionText || `Is "${currentQuizWord}" \r\n "${currentQuizDefinition}"?`;
 
   // Show true/false quiz and hide vocab card
   document.getElementById('trueFalseContainer').style.display = 'block';

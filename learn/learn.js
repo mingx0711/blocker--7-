@@ -524,6 +524,12 @@ async function generateLearningQueue(bookSelected) {
     if (utils.hasGermanPhraseSpelling(wordObj)) {
       quizTypes.push('quiz11');
     }
+    if (utils.hasReflexive(wordObj)) {
+      quizTypes.push('quiz12');
+    }
+    if (utils.hasFixedConnection(wordObj)) {
+      quizTypes.push('quiz13');
+    }
     return quizTypes;
   }
 
@@ -531,9 +537,17 @@ async function generateLearningQueue(bookSelected) {
     const word = wordObj.word;
     const eligibleQuizTypes = getEligibleQuizTypes(wordObj);
     const quizCounts = wordQuizTypeCounts[word] || {};
-    const lowestUsage = Math.min(...eligibleQuizTypes.map(type => quizCounts[type] || 0));
-    const leastUsedTypes = eligibleQuizTypes.filter(type => (quizCounts[type] || 0) === lowestUsage);
-    return leastUsedTypes[Math.floor(Math.random() * leastUsedTypes.length)];
+    const pickLeastUsedType = quizTypes => {
+      const lowestUsage = Math.min(...quizTypes.map(type => quizCounts[type] || 0));
+      const leastUsedTypes = quizTypes.filter(type => (quizCounts[type] || 0) === lowestUsage);
+      return leastUsedTypes[Math.floor(Math.random() * leastUsedTypes.length)];
+    };
+
+    const selectedType = pickLeastUsedType(eligibleQuizTypes);
+    if (selectedType === 'quiz12' && eligibleQuizTypes.length > 1 && Math.random() < 0.5) {
+      return pickLeastUsedType(eligibleQuizTypes.filter(type => type !== 'quiz12'));
+    }
+    return selectedType;
   }
 
   function getFlashcardBatches(words) {
@@ -555,7 +569,11 @@ async function generateLearningQueue(bookSelected) {
     const targetQuizCount = batchWords.length === 4 ? 6 : batchWords.length * minimumQuizzesPerWord;
 
     batchWords.forEach(wordObj => {
-      for (let i = 0; i < minimumQuizzesPerWord; i++) {
+      if (utils.hasFixedConnection(wordObj)) {
+        addQuizToQueue(batchQuizQueue, 'quiz13', wordObj);
+      }
+      const remainingQuizzes = utils.hasFixedConnection(wordObj) ? minimumQuizzesPerWord - 1 : minimumQuizzesPerWord;
+      for (let i = 0; i < remainingQuizzes; i++) {
         addQuizToQueue(batchQuizQueue, pickQuizTypeForWord(wordObj), wordObj);
       }
     });
@@ -581,7 +599,11 @@ async function generateLearningQueue(bookSelected) {
     const finalQuizQueue = [];
 
     words.forEach(wordObj => {
-      for (let i = 0; i < 2; i++) {
+      if (utils.hasFixedConnection(wordObj)) {
+        addQuizToQueue(finalQuizQueue, 'quiz13', wordObj);
+      }
+      const remainingQuizzes = utils.hasFixedConnection(wordObj) ? 1 : 2;
+      for (let i = 0; i < remainingQuizzes; i++) {
         addQuizToQueue(finalQuizQueue, pickQuizTypeForWord(wordObj), wordObj);
       }
     });
@@ -694,6 +716,12 @@ function showNextLearningStep() {
     case "quiz11":
       quizStyle11()
       break;
+    case "quiz12":
+      quizStyle12()
+      break;
+    case "quiz13":
+      quizStyle13()
+      break;
     case "flashcard":
       showNextVocab()
       break;
@@ -769,6 +797,18 @@ function showNextVocab() {
           infoDiv.textContent = "group:" + wordObj.conjugations.group
         }
     }
+  }
+  const flashcardGrammar = [];
+  if (utils.isReflexive(wordObj)) {
+    flashcardGrammar.push('reflexive');
+  }
+  if (utils.hasFixedConnection(wordObj)) {
+    flashcardGrammar.push(`used with: ${wordObj.fixedConnections[0]}`);
+  }
+  if (flashcardGrammar.length > 0) {
+    infoDivTwo.textContent = [infoDivTwo.textContent, ...flashcardGrammar]
+      .filter(Boolean)
+      .join(' | ');
   }
 
   if (wordObj.pronounciation) {
@@ -1129,6 +1169,32 @@ function quizStyle11() {
   currentQuizDefinition = quizData.correctAnswer;
   quizType = quizData.quizType;
   currentLanguage = correctVocab.language || utils.convertToAbbr(correctVocab.book);
+  wordToSpeak = quizData.correctAnswer;
+  utils.setupSpellingQuiz(correctVocab, {
+    prompt: quizData.questionText,
+    correctAnswer: quizData.correctAnswer
+  });
+  currentTest = { quizStyle: quizData.testLabel, vocab: correctVocab.word, book: correctVocab.book };
+}
+function quizStyle12() {
+  currentSpellingReview = null;
+  const correctVocab = learningQueue[currentStep].word;
+  const isCorrect = utils.isReflexive(correctVocab);
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = isCorrect ? 'reflexive' : 'not reflexive';
+  quizType = 'reflexive';
+  isPairCorrect = isCorrect;
+  utils.setupTFQuiz(correctVocab, currentQuizWord, currentQuizDefinition, `Is "${correctVocab.word}" reflexive?`);
+  currentTest = { quizStyle: 'Ask if reflexive', vocab: correctVocab.word, book: correctVocab.book };
+}
+function quizStyle13() {
+  currentSpellingReview = null;
+  const correctVocab = learningQueue[currentStep].word;
+  const quizData = utils.prepareFixedConnectionSpellingQuiz(correctVocab);
+  if (!quizData) return quizStyle2();
+  currentQuizWord = correctVocab.word;
+  currentQuizDefinition = quizData.correctAnswer;
+  quizType = quizData.quizType;
   wordToSpeak = quizData.correctAnswer;
   utils.setupSpellingQuiz(correctVocab, {
     prompt: quizData.questionText,
